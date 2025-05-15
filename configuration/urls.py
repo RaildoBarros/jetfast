@@ -16,8 +16,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.shortcuts import redirect
 
 urlpatterns = [
+    path('', lambda request: redirect('admin:jetfast_veiculo_changelist'), name='home'),
     path('admin/', admin.site.urls),
-    path('', include('jetfast.urls')),
+    path('jetfast', include('jetfast.urls')),
 ]

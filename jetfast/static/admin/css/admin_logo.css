@@ -1,0 +1,14 @@
+#header {
+    height: auto; /* Remove a altura fixa do cabeçalho */
+}
+
+#header h1 {
+    background: url(/static/img/jetfast_logo.png) no-repeat 10px center; /* Substitua pelo caminho do seu logo */
+    padding-left: 120px; /* Ajuste o padding para o tamanho do seu logo */
+    height: 40px; /* Ajuste a altura para o tamanho do seu logo */
+    background-size: contain; /* Garante que o logo caiba no espaço */
+}
+
+#header h1 a {
+    color: #fff; /* Cor do texto do cabeçalho */
+}

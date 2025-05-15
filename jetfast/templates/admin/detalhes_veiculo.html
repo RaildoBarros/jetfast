@@ -1,0 +1,54 @@
+{% extends 'admin/base_site.html' %}
+{% load static %}
+
+{% block title %}Detalhes do Veículo - {{ veiculo.nome }} - JetFast{% endblock %}
+
+{% block branding %}
+<h1 id="site-name"><a href="{% url 'admin:index' %}">JetFast</a></h1>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}
+
+{% block nav-sidebar %}
+{{ block.super }}
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <h1>Detalhes do Veículo</h1>
+
+    <div class="module">
+        <table class="admin-table">
+            <tr><th>Placa</th><td>{{ veiculo.placa }}</td></tr>
+            <tr><th>Nome</th><td>{{ veiculo.nome }}</td></tr>
+            <tr><th>Marca</th><td>{{ veiculo.marca }}</td></tr>
+            <tr><th>Modelo</th><td>{{ veiculo.modelo }}</td></tr>
+            <tr><th>Plano</th><td>{{ veiculo.plano }} ({{ veiculo.plano.quantidade_lavagens }} lavagens/mês)</td></tr>
+            <tr><th>Ativo desde</th><td>{{ veiculo.data_cadastro|date:"d/m/Y H:i" }}</td></tr>
+            <tr><th>Lavagens disponíveis</th><td>{{ quantidade_lavagens_disponiveis }}</td></tr>
+        </table>
+    </div>
+
+    <div class="submit-row" style="display: flex; justify-content: flex-start; gap: 10px;">
+        <a href="{% url 'admin:jetfast_veiculo_changelist' %}" class="button" style="background-color: #6c757d; color: white; text-decoration: none;display: inline-flex; justify-content: center; align-items: center; margin: 2px; width: 110px">Voltar</a>
+        <form method="post" action="{% url 'registrar_lavagem' veiculo.id %}">
+            {% csrf_token %}
+            <input type="submit" value="Adicionar Lavagem" class="button">
+        </form>
+    </div>
+
+    <div class="module">
+        <h2>Histórico de Lavagens</h2>
+        {% if lavagens_realizadas %}
+        <ul>
+            {% for lavagem in lavagens_realizadas %}
+            <li>{{ lavagem.data_lavagem|date:"d/m/Y H:i" }}</li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p>Nenhuma lavagem registrada para este veículo.</p>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}
