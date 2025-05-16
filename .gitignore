@@ -1,0 +1,40 @@
+# Arquivos específicos do Django
+*.log
+*.pot
+*.pyc
+__pycache__/
+local_settings.py
+db.sqlite3
+media/*
+static/*
+
+# Ambiente virtual
+.env
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Arquivos de IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+*.mate-session/
+
+# Arquivos do sistema operacional
+.DS_Store
+Thumbs.db
+
+# Cobertura de testes
+.coverage
+coverage/
+
+# Pacotes distribuíveis
+dist/
+build/
+*.egg-info/
+
+# Outros arquivos temporários ou específicos
+*.sqlite3-journal

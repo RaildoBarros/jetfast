@@ -4,7 +4,28 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="5ae491ee-e9d6-45b0-9c8b-883a0b688220" name="Changes" comment="Personalizações" />
+    <list default="true" id="5ae491ee-e9d6-45b0-9c8b-883a0b688220" name="Changes" comment="Demais arquivos e requirements">
+      <change afterPath="$PROJECT_DIR$/admin-interface/favicon/jetfast_logo.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/admin-interface/logo/jetfast_logo.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/admin-interface/logo/jetfast_logo_51M5hjG.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/admin-interface/logo/jetfast_logo_BASqgoe.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/admin-interface/logo/jetfast_logo_YXuyCUn.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/admin-interface/logo/jetfast_logo_jHNjPXV.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/admin-interface/logo/lupa.svg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/admin-interface/logo/lupa_UnQ8vl2.svg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/jetfast/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/jetfast/admin.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/jetfast/apps.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/jetfast/migrations/0001_initial.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/jetfast/migrations/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/jetfast/models.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/jetfast/static/img/jetfast_logo.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/jetfast/tests.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/jetfast/views.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -20,6 +41,18 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "RaildoBarros"
+  }
+}]]></component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/RaildoBarros/jetfast.git",
+    "accountId": "59ded7d3-574b-48bf-a83f-29d9c2934328"
+  }
+}]]></component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 3
 }</component>
@@ -102,7 +135,7 @@
       <workItem from="1747331477195" duration="31000" />
       <workItem from="1747331590192" duration="815000" />
       <workItem from="1747332875492" duration="2061000" />
-      <workItem from="1747335361505" duration="1799000" />
+      <workItem from="1747335361505" duration="2569000" />
     </task>
     <task id="LOCAL-00001" summary="Commit inicial">
       <option name="closed" value="true" />
@@ -120,7 +153,15 @@
       <option name="project" value="LOCAL" />
       <updated>1747337460228</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="Demais arquivos e requirements">
+      <option name="closed" value="true" />
+      <created>1747355873069</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1747355873069</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -140,6 +181,7 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Commit inicial" />
     <MESSAGE value="Personalizações" />
-    <option name="LAST_COMMIT_MESSAGE" value="Personalizações" />
+    <MESSAGE value="Demais arquivos e requirements" />
+    <option name="LAST_COMMIT_MESSAGE" value="Demais arquivos e requirements" />
   </component>
 </project>
