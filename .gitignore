@@ -40,3 +40,4 @@ build/
 
 # Outros arquivos temporários ou específicos
 *.sqlite3-journal
+workspace.xml
