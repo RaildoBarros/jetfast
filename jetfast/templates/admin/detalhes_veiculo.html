@@ -1,6 +1,14 @@
 {% extends 'admin/base_site.html' %}
 {% load static %}
 
+{% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}
+    </ul>
+{% endif %}
+
 {% block title %}Detalhes do Veículo - {{ veiculo.nome }} - JetFast{% endblock %}
 
 {% block branding %}

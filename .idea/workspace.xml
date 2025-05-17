@@ -6,10 +6,9 @@
   <component name="ChangeListManager">
     <list default="true" id="5ae491ee-e9d6-45b0-9c8b-883a0b688220" name="Changes" comment="gitignore">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jetfast/static/admin/css/admin_logo.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/jetfast/static/css/style.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/jetfast/static/img/jetfast_logo.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/jetfast/static/img/lupa.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/configuration/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/configuration/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jetfast/templates/admin/detalhes_veiculo.html" beforeDir="false" afterPath="$PROJECT_DIR$/jetfast/templates/admin/detalhes_veiculo.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jetfast/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/jetfast/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -68,6 +67,7 @@
       <recent name="$PROJECT_DIR$/jetfast/templates/admin" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
       <recent name="$PROJECT_DIR$/jetfast/static" />
       <recent name="$PROJECT_DIR$/static/admin/css" />
       <recent name="$PROJECT_DIR$/jetfast/static/img" />
@@ -121,7 +121,7 @@
       <workItem from="1747331590192" duration="815000" />
       <workItem from="1747332875492" duration="2061000" />
       <workItem from="1747335361505" duration="4959000" />
-      <workItem from="1747421075640" duration="615000" />
+      <workItem from="1747421075640" duration="3940000" />
     </task>
     <task id="LOCAL-00001" summary="Commit inicial">
       <option name="closed" value="true" />
@@ -171,7 +171,23 @@
       <option name="project" value="LOCAL" />
       <updated>1747356257302</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="Refatoração de pasta">
+      <option name="closed" value="true" />
+      <created>1747421844664</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1747421844664</updated>
+    </task>
+    <task id="LOCAL-00008" summary="gitignore">
+      <option name="closed" value="true" />
+      <created>1747422398772</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1747422398772</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -192,6 +208,7 @@
     <MESSAGE value="Commit inicial" />
     <MESSAGE value="Personalizações" />
     <MESSAGE value="Demais arquivos e requirements" />
+    <MESSAGE value="Refatoração de pasta" />
     <MESSAGE value="gitignore" />
     <option name="LAST_COMMIT_MESSAGE" value="gitignore" />
   </component>
