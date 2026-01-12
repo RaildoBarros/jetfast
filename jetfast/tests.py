@@ -88,3 +88,32 @@ class LavagemViewsTestCase(TestCase):
         url_invalida = reverse('detalhes_veiculo', kwargs={'pk': 999})
         response = self.client.get(url_invalida)
         self.assertEqual(response.status_code, 404)
+
+    def test_fluxo_completo_uso_do_plano(self):
+        """
+        Simula o ciclo de vida:
+        1. Verifica saldo inicial.
+        2. Realiza lavagens até o limite.
+        3. Tenta ultrapassar o limite e verifica bloqueio.
+        """
+        # 1. Verifica se a página de detalhes mostra o saldo inicial (2 lavagens)
+        response = self.client.get(reverse('detalhes_veiculo', kwargs={'pk': self.veiculo.pk}))
+        self.assertEqual(response.context['quantidade_lavagens_disponiveis'], 2)
+
+        # 2. Primeira lavagem via POST
+        self.client.post(self.url)
+
+        # 3. Segunda lavagem via POST (Atingindo o limite)
+        self.client.post(self.url)
+
+        # 4. Verifica no banco se as 2 lavagens existem
+        self.assertEqual(Lavagem.objects.filter(veiculo=self.veiculo).count(), 2)
+
+        # 5. Tenta a terceira lavagem (Deve ser bloqueada)
+        response_bloqueio = self.client.post(self.url, follow=True)  # follow=True para seguir o redirecionamento
+
+        # 6. Verifica se a mensagem de erro apareceu na página após o redirecionamento
+        self.assertContains(response_bloqueio, "Não há mais lavagens disponíveis no mês.")
+
+        # 7. Verifica se o saldo final na tela de detalhes é 0
+        self.assertEqual(response_bloqueio.context['quantidade_lavagens_disponiveis'], 0)
