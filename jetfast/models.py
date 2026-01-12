@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils import timezone
+from django.core.validators import RegexValidator
 
 class Plano(models.Model):
     nome = models.CharField(max_length=100, unique=True)
@@ -25,7 +26,13 @@ class ModeloVeiculo(models.Model):
 
 
 class Veiculo(models.Model):
-    placa = models.CharField(max_length=10, unique=True)
+    # Regex que aceita ABC-1234 ou ABC1D23
+    placa_validator = RegexValidator(
+        regex=r'^[A-Z]{3}-?\d[A-Z0-9]\d{2}$',
+        message="A placa deve estar no formato ABC-1234 ou ABC1D23"
+    )
+
+    placa = models.CharField(max_length=8, unique=True, validators=[placa_validator])
     nome = models.CharField(max_length=200)
     modelo_veiculo = models.ForeignKey('ModeloVeiculo', on_delete=models.PROTECT, verbose_name="Veículo")
     plano = models.ForeignKey(Plano, on_delete=models.CASCADE)
