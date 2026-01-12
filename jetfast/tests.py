@@ -65,3 +65,26 @@ class LavagemViewsTestCase(TestCase):
         self.assertEqual(Lavagem.objects.filter(veiculo=self.veiculo).count(), 3)  # 1 antiga + 2 novas
         messages = list(get_messages(response.wsgi_request))
         self.assertEqual(str(messages[0]), "Lavagem registrada com sucesso.")
+
+    def test_detalhes_veiculo_status_code(self):
+        """Verifica se a página de detalhes carrega com sucesso (200)."""
+        response = self.client.get(reverse('detalhes_veiculo', kwargs={'pk': self.veiculo.pk}))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'admin/detalhes_veiculo.html')
+
+    def test_calculo_lavagens_disponiveis_no_contexto(self):
+        """Verifica se o cálculo de lavagens restantes enviado ao template está correto."""
+        # O plano permite 2 lavagens. Vamos realizar 1.
+        Lavagem.objects.create(veiculo=self.veiculo)
+
+        response = self.client.get(reverse('detalhes_veiculo', kwargs={'pk': self.veiculo.pk}))
+
+        # O contexto deve indicar que ainda resta 1 lavagem (2 - 1 = 1)
+        self.assertEqual(response.context['quantidade_lavagens_disponiveis'], 1)
+        self.assertEqual(len(response.context['lavagens_realizadas']), 1)
+
+    def test_detalhes_veiculo_404_inexistente(self):
+        """Verifica se retorna 404 ao tentar acessar um veículo que não existe."""
+        url_invalida = reverse('detalhes_veiculo', kwargs={'pk': 999})
+        response = self.client.get(url_invalida)
+        self.assertEqual(response.status_code, 404)
