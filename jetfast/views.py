@@ -6,8 +6,10 @@ from django.db.models import Count
 
 
 def detalhes_veiculo(request, pk):
+    agora = timezone.now()
+
     veiculo = get_object_or_404(Veiculo, pk=pk)
-    lavagens_realizadas = Lavagem.objects.filter(veiculo=veiculo).order_by('-data_lavagem')
+    lavagens_realizadas = Lavagem.objects.filter(veiculo=veiculo, data_lavagem__year=agora.year, data_lavagem__month=agora.month).order_by('-data_lavagem')
     quantidade_lavagens_disponiveis = veiculo.plano.quantidade_lavagens - lavagens_realizadas.count()
     return render(request, 'admin/detalhes_veiculo.html', {
         'veiculo': veiculo,

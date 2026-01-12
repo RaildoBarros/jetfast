@@ -4,11 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="5ae491ee-e9d6-45b0-9c8b-883a0b688220" name="Changes" comment="Adiciona modelos Marca e ModeloVeiculo, remove campos marca e modelo de Veiculo">
+    <list default="true" id="5ae491ee-e9d6-45b0-9c8b-883a0b688220" name="Changes" comment="Refatora configuração do admin para usar constante CSS e atualiza gerenciamento de SECRET_KEY">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/configuration/production.py" beforeDir="false" afterPath="$PROJECT_DIR$/configuration/production.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/configuration/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/configuration/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jetfast/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/jetfast/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jetfast/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/jetfast/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -247,7 +246,15 @@
       <option name="project" value="LOCAL" />
       <updated>1768217902974</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="Refatora configuração do admin para usar constante CSS e atualiza gerenciamento de SECRET_KEY">
+      <option name="closed" value="true" />
+      <created>1768218834885</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1768218834885</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -275,7 +282,8 @@
     <MESSAGE value="Adiciona modelos de Marca e ModeloVeiculo, atualiza admin e detalhes de Veiculo" />
     <MESSAGE value="Atualiza configuração do projeto para Python 3.12 e modifica .gitignore" />
     <MESSAGE value="Adiciona modelos Marca e ModeloVeiculo, remove campos marca e modelo de Veiculo" />
-    <option name="LAST_COMMIT_MESSAGE" value="Adiciona modelos Marca e ModeloVeiculo, remove campos marca e modelo de Veiculo" />
+    <MESSAGE value="Refatora configuração do admin para usar constante CSS e atualiza gerenciamento de SECRET_KEY" />
+    <option name="LAST_COMMIT_MESSAGE" value="Refatora configuração do admin para usar constante CSS e atualiza gerenciamento de SECRET_KEY" />
   </component>
   <component name="github-copilot-workspace">
     <instructionFileLocations>
