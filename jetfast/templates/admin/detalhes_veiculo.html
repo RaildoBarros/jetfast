@@ -29,8 +29,7 @@
         <table class="admin-table">
             <tr><th>Placa</th><td>{{ veiculo.placa }}</td></tr>
             <tr><th>Nome</th><td>{{ veiculo.nome }}</td></tr>
-            <tr><th>Marca</th><td>{{ veiculo.marca }}</td></tr>
-            <tr><th>Modelo</th><td>{{ veiculo.modelo }}</td></tr>
+            <tr><th>Veículo</th><td>{{ veiculo.modelo_veiculo }}</td></tr>
             <tr><th>Plano</th><td>{{ veiculo.plano }} ({{ veiculo.plano.quantidade_lavagens }} lavagens/mês)</td></tr>
             <tr><th>Ativo desde</th><td>{{ veiculo.data_cadastro|date:"d/m/Y H:i" }}</td></tr>
             <tr><th>Lavagens disponíveis</th><td>{{ quantidade_lavagens_disponiveis }}</td></tr>
