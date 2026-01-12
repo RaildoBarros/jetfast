@@ -3,6 +3,7 @@ from django.contrib import messages
 from .models import Veiculo, Lavagem
 from django.utils import timezone
 from django.db.models import Count
+import calendar
 
 
 def detalhes_veiculo(request, pk):
@@ -21,7 +22,8 @@ def registrar_lavagem(request, pk):
     veiculo = get_object_or_404(Veiculo, id=pk)
     hoje = timezone.now()
     primeiro_dia_mes = hoje.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-    ultimo_dia_mes = (hoje.replace(day=31) if hoje.month == 12 else hoje.replace(month=hoje.month + 1, day=1)) - timezone.timedelta(days=1)
+    _, ultimo_dia = calendar.monthrange(hoje.year, hoje.month)
+    ultimo_dia_mes = hoje.replace(day=ultimo_dia, hour=23, minute=59, second=59)
 
     lavagens_no_mes = Lavagem.objects.filter(veiculo=veiculo, data_lavagem__gte=primeiro_dia_mes, data_lavagem__lte=ultimo_dia_mes).count()
 

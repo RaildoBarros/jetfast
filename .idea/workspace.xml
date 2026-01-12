@@ -4,8 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="5ae491ee-e9d6-45b0-9c8b-883a0b688220" name="Changes" comment="Adiciona script para backup do banco de dados">
-      <change beforePath="$PROJECT_DIR$/jetfast/tests.py" beforeDir="false" afterPath="$PROJECT_DIR$/jetfast/tests.py" afterDir="false" />
+    <list default="true" id="5ae491ee-e9d6-45b0-9c8b-883a0b688220" name="Changes" comment="Adiciona testes para registro de lavagens e valida limite de plano">
       <change beforePath="$PROJECT_DIR$/jetfast/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/jetfast/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -269,7 +268,15 @@
       <option name="project" value="LOCAL" />
       <updated>1768221770798</updated>
     </task>
-    <option name="localTasksCounter" value="17" />
+    <task id="LOCAL-00017" summary="Adiciona testes para registro de lavagens e valida limite de plano">
+      <option name="closed" value="true" />
+      <created>1768222444352</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1768222444352</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -300,7 +307,8 @@
     <MESSAGE value="Refatora configuração do admin para usar constante CSS e atualiza gerenciamento de SECRET_KEY" />
     <MESSAGE value="Atualiza filtro de lavagens realizadas para considerar mês e ano atuais" />
     <MESSAGE value="Adiciona script para backup do banco de dados" />
-    <option name="LAST_COMMIT_MESSAGE" value="Adiciona script para backup do banco de dados" />
+    <MESSAGE value="Adiciona testes para registro de lavagens e valida limite de plano" />
+    <option name="LAST_COMMIT_MESSAGE" value="Adiciona testes para registro de lavagens e valida limite de plano" />
   </component>
   <component name="github-copilot-workspace">
     <instructionFileLocations>
