@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,10 +21,27 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-8oj_01_7fsb)-3)^@%zvi=%n#80*f_p^5r&(r3ig53dsq%)e0e'
+# Do NOT store the secret key in source control. Load it from an environment
+# variable instead. In production, set the DJANGO_SECRET_KEY environment
+# variable. When running locally (DEBUG) we'll generate a temporary key at
+# runtime if none is provided so development remains convenient.
+from django.core.management.utils import get_random_secret_key
+from django.core.exceptions import ImproperlyConfigured
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# Allow overriding DEBUG from environment for CI/containers; default to True for local development
+DEBUG = os.environ.get('DJANGO_DEBUG', 'True').lower() in ('1', 'true', 'yes')
+
+# Prefer explicit production environment variables; fall back to generating a key in DEBUG mode
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY') or os.environ.get('SECRET_KEY')
+if not SECRET_KEY:
+    if DEBUG:
+        # Generate a non-persistent key for development/testing only
+        SECRET_KEY = get_random_secret_key()
+    else:
+        raise ImproperlyConfigured(
+            'The SECRET_KEY environment variable is not set. Set DJANGO_SECRET_KEY in production.'
+        )
+
 
 ALLOWED_HOSTS = []
 

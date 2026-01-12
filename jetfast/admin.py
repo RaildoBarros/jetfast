@@ -3,10 +3,13 @@ from django.urls import reverse
 from django.utils.html import format_html
 from .models import Marca, ModeloVeiculo, Veiculo, Plano, Lavagem
 
+# Single constant for the admin CSS path to avoid duplicating the literal
+CSS_ADMIN_PATH = 'admin/css/admin_logo.css'
+
 
 class Media:
     css = {
-        'all': ('admin/css/admin_logo.css',)
+        'all': (CSS_ADMIN_PATH,)
     }
 admin.site.Media = Media
 
@@ -18,7 +21,7 @@ class PlanoAdmin(admin.ModelAdmin):
 
     class Media:
         css = {
-            'all': ('admin/css/admin_logo.css',)
+            'all': (CSS_ADMIN_PATH,)
         }
 
 @admin.register(Marca)
@@ -28,7 +31,7 @@ class MarcaAdmin(admin.ModelAdmin):
 
     class Media:
         css = {
-            'all': ('admin/css/admin_logo.css',)
+            'all': (CSS_ADMIN_PATH,)
         }
 
 @admin.register(ModeloVeiculo)
@@ -39,7 +42,7 @@ class ModeloVeiculoAdmin(admin.ModelAdmin):
 
     class Media:
         css = {
-            'all': ('admin/css/admin_logo.css',)
+            'all': (CSS_ADMIN_PATH,)
         }
 
 @admin.register(Veiculo)
@@ -50,12 +53,15 @@ class VeiculoAdmin(admin.ModelAdmin):
 
     def ver_detalhes(self, obj):
         url = reverse('detalhes_veiculo', args=[obj.id])
-        return format_html('<a href="{}" style="display: flex; justify-content: center;"><img src="/static/admin/img/search.svg" alt="Ver Detalhes"     style="width: 16px; height: 16px; "></a>', url)
+        return format_html(
+            '<a href="{url}" style="display: flex; justify-content: center;"><img src="/static/admin/img/search.svg" alt="Ver Detalhes" style="width: 16px; height: 16px;"></a>',
+            url=url,
+        )
     ver_detalhes.short_description = 'Detalhes'
 
     class Media:
         css = {
-            'all': ('admin/css/admin_logo.css',)
+            'all': (CSS_ADMIN_PATH,)
         }
 
 @admin.register(Lavagem)
@@ -66,5 +72,5 @@ class LavagemAdmin(admin.ModelAdmin):
 
     class Media:
         css = {
-            'all': ('admin/css/admin_logo.css',)
+            'all': (CSS_ADMIN_PATH,)
         }

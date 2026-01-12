@@ -21,7 +21,20 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-8oj_01_7fsb)-3)^@%zvi=%n#80*f_p^5r&(r3ig53dsq%)e0e'
+# Do NOT store the secret key in source control. Load it from an environment
+# variable instead. In production, set the DJANGO_SECRET_KEY environment
+# variable. This prevents accidental leakage of the key in the codebase
+# (resolves SonarQube issue recommending key revocation/removal).
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY') or os.environ.get('SECRET_KEY')
+if not SECRET_KEY:
+    # In production (DEBUG=False) we must have a secret key set. Raise a clear
+    # error so deployment fails fast instead of silently using an insecure key.
+    from django.core.exceptions import ImproperlyConfigured
+
+    raise ImproperlyConfigured(
+        'The SECRET_KEY environment variable is not set. Set DJANGO_SECRET_KEY in production.'
+    )
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
