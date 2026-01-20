@@ -44,7 +44,7 @@ class Veiculo(models.Model):
 
 class Lavagem(models.Model):
     veiculo = models.ForeignKey(Veiculo, on_delete=models.CASCADE)
-    data_lavagem = models.DateTimeField(auto_now_add=True)
+    data_lavagem = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
         return f"{self.veiculo} lavado em {self.data_lavagem.strftime('%d/%m/%Y %H:%M')}"

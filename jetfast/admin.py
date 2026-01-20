@@ -69,6 +69,7 @@ class LavagemAdmin(admin.ModelAdmin):
     list_display = ('veiculo', 'data_lavagem')
     list_filter = ('veiculo', 'data_lavagem')
     date_hierarchy = 'data_lavagem'
+    fields = ('veiculo', 'data_lavagem')
 
     class Media:
         css = {
