@@ -1,0 +1,104 @@
+{% extends 'admin/base_site.html' %}
+{% block content %}
+<h1>Painel BI - Lavagens de Veículos</h1>
+<div id="kpi-container" style="display: flex; gap: 2rem; margin-bottom: 2rem;">
+    <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; min-width: 180px;">
+        <h3 style="margin: 0;">Taxa de Ocupação</h3>
+        <div id="kpi-taxa-ocupacao" style="font-size: 2rem; color: #007bff;">--%</div>
+    </div>
+    <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; min-width: 180px;">
+        <h3 style="margin: 0;">Churn Rate</h3>
+        <div id="kpi-churn-rate" style="font-size: 2rem; color: #dc3545;">--%</div>
+    </div>
+    <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; min-width: 180px;">
+        <h3 style="margin: 0;">Faturamento Estimado</h3>
+        <div id="kpi-faturamento" style="font-size: 2rem; color: #28a745;">R$ --</div>
+    </div>
+</div>
+<div id="charts-container" style="display: flex; flex-wrap: wrap; gap: 2rem;">
+    <div style="flex: 1 1 45%; min-width: 400px; max-width: 48%;">
+        <div id="chart-lavagens-mes" style="width:100%;height:400px;"></div>
+    </div>
+    <div style="flex: 1 1 45%; min-width: 400px; max-width: 48%;">
+        <div id="chart-lavagens-veiculo" style="width:100%;height:400px;"></div>
+    </div>
+    <div style="flex: 1 1 45%; min-width: 400px; max-width: 48%;">
+        <div id="chart-lavagens-plano" style="width:100%;height:400px;"></div>
+    </div>
+    <div style="flex: 1 1 45%; min-width: 400px; max-width: 48%;">
+        <div id="chart-veiculos-mes" style="width:100%;height:400px;"></div>
+    </div>
+    <div style="flex: 1 1 45%; min-width: 400px; max-width: 48%;">
+        <div id="chart-lavagens-dia-semana" style="width:100%;height:400px;"></div>
+    </div>
+</div>
+<button id="export-csv" class="button">Exportar CSV</button>
+<script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+<script>
+function formatMonth(dateStr) {
+    const d = new Date(dateStr);
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2, '0');
+}
+const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+fetch("/jetfast/bi-dashboard/data/")
+  .then(resp => resp.json())
+  .then(data => {
+    // KPIs
+    document.getElementById('kpi-taxa-ocupacao').innerText = data.kpi.taxa_ocupacao.toFixed(1) + '%';
+    document.getElementById('kpi-churn-rate').innerText = data.kpi.churn_rate.toFixed(1) + '%';
+    document.getElementById('kpi-faturamento').innerText = 'R$ ' + (data.kpi.faturamento_estimado || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2});
+    // Lavagens por mês
+    const meses = data.lavagens_por_mes.map(x => formatMonth(x.mes));
+    const lavagensMes = data.lavagens_por_mes.map(x => x.total);
+    Plotly.newPlot('chart-lavagens-mes', [{
+      x: meses,
+      y: lavagensMes,
+      type: 'bar',
+      marker: {color: '#007bff'}
+    }], {title: 'Lavagens por Mês'});
+    // Lavagens por veículo (top 10)
+    const veiculos = data.lavagens_por_veiculo.map(x => x.veiculo__placa + ' - ' + x.veiculo__nome);
+    const lavagensVeiculo = data.lavagens_por_veiculo.map(x => x.total);
+    Plotly.newPlot('chart-lavagens-veiculo', [{
+      x: veiculos,
+      y: lavagensVeiculo,
+      type: 'bar',
+      marker: {color: '#28a745'}
+    }], {title: 'Top 10 Veículos por Lavagens'});
+    // Lavagens por plano
+    const planos = data.lavagens_por_plano.map(x => x.veiculo__plano__nome);
+    const lavagensPlano = data.lavagens_por_plano.map(x => x.total);
+    Plotly.newPlot('chart-lavagens-plano', [{
+      x: planos,
+      y: lavagensPlano,
+      type: 'bar',
+      marker: {color: '#ffc107'}
+    }], {title: 'Lavagens por Plano'});
+    // Veículos cadastrados por mês
+    const mesesVeic = data.veiculos_por_mes.map(x => formatMonth(x.mes));
+    const veiculosMes = data.veiculos_por_mes.map(x => x.total);
+    Plotly.newPlot('chart-veiculos-mes', [{
+      x: mesesVeic,
+      y: veiculosMes,
+      type: 'bar',
+      marker: {color: '#17a2b8'}
+    }], {title: 'Veículos Cadastrados por Mês'});
+    // Lavagens por dia da semana
+    const lavagensDiaSemana = Array(7).fill(0);
+    data.lavagens_por_dia_semana.forEach(x => {
+      // Django: 1=Dom, 2=Seg, ..., 7=Sáb
+      lavagensDiaSemana[x.dia_semana-1] = x.total;
+    });
+    Plotly.newPlot('chart-lavagens-dia-semana', [{
+      x: diasSemana,
+      y: lavagensDiaSemana,
+      type: 'scatter',
+      mode: 'lines+markers',
+      marker: {color: '#6f42c1'}
+    }], {title: 'Lavagens por Dia da Semana'});
+  });
+document.getElementById('export-csv').onclick = function() {
+    window.location.href = '/jetfast/bi-dashboard/export-csv/';
+};
+</script>
+{% endblock %}
