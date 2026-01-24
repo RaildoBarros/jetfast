@@ -1,61 +1,105 @@
 {% extends 'admin/base_site.html' %}
 {% load static %}
 
-{% if messages %}
-    <ul class="messages">
-        {% for message in messages %}
-            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-        {% endfor %}
-    </ul>
-{% endif %}
-
 {% block title %}Detalhes do Veículo - {{ veiculo.nome }} - JetFast{% endblock %}
 
 {% block branding %}
 <h1 id="site-name"><a href="{% url 'admin:index' %}">JetFast</a></h1>
 {% endblock %}
 
-{% block nav-global %}{% endblock %}
-
-{% block nav-sidebar %}
-{{ block.super }}
-{% endblock %}
-
 {% block content %}
 <div id="content-main">
     <h1>Detalhes do Veículo</h1>
 
+    {% if messages %}
+        <ul class="messagelist">
+            {% for message in messages %}
+                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
     <div class="module">
-        <table class="admin-table">
-            <tr><th>Placa</th><td>{{ veiculo.placa }}</td></tr>
-            <tr><th>Nome</th><td>{{ veiculo.nome }}</td></tr>
-            <tr><th>Veículo</th><td>{{ veiculo.modelo_veiculo }}</td></tr>
-            <tr><th>Plano</th><td>{{ veiculo.plano }} ({{ veiculo.plano.quantidade_lavagens }} lavagens/mês)</td></tr>
-            <tr><th>Ativo desde</th><td>{{ veiculo.data_cadastro|date:"d/m/Y H:i" }}</td></tr>
-            <tr><th>Lavagens disponíveis</th><td>{{ quantidade_lavagens_disponiveis }}</td></tr>
+        <table style="width: 100%;">
+            <tr><th>Placa:</th><td><strong>{{ veiculo.placa }}</strong></td></tr>
+            <tr><th>Nome/Proprietário:</th><td>{{ veiculo.nome }}</td></tr>
+            <tr><th>Telefone:</th><td>{{ veiculo.telefone|default:"Não informado" }}</td></tr>
+            <tr><th>Veículo:</th><td>{{ veiculo.modelo_veiculo }}</td></tr>
+            <tr><th>Plano:</th><td>{{ veiculo.plano }} ({{ veiculo.plano.quantidade_lavagens }} lavagens/mês)</td></tr>
+            <tr><th>Lavagens Disponíveis:</th><td><strong>{{ quantidade_lavagens_disponiveis }}</strong></td></tr>
         </table>
     </div>
 
-    <div class="submit-row" style="display: flex; justify-content: flex-start; gap: 10px;">
-        <a href="{% url 'admin:jetfast_veiculo_changelist' %}" class="button" style="background-color: #6c757d; color: white; text-decoration: none;display: inline-flex; justify-content: center; align-items: center; margin: 2px; width: 110px">Voltar</a>
+    <div class="submit-row" style="display: flex; justify-content: flex-start; gap: 10px; margin: 20px 0;">
+        <a href="{% url 'admin:jetfast_veiculo_changelist' %}" class="button" style="background-color: #6c757d;">Voltar</a>
         <form method="post" action="{% url 'registrar_lavagem' veiculo.id %}">
             {% csrf_token %}
-            <input type="submit" value="Adicionar Lavagem" class="button">
+            <input type="submit" value="Colocar na Fila" class="button" {% if quantidade_lavagens_disponiveis <= 0 %}disabled title="Sem lavagens disponíveis"{% endif %}>
         </form>
     </div>
 
     <div class="module">
-        <h2>Histórico de Lavagens</h2>
-        {% if lavagens_realizadas %}
-        <ul>
-            {% for lavagem in lavagens_realizadas %}
-            <li>{{ lavagem.data_lavagem|date:"d/m/Y H:i" }}</li>
-            {% endfor %}
-        </ul>
-        {% else %}
-        <p>Nenhuma lavagem registrada para este veículo.</p>
-        {% endif %}
+        <h2>Histórico de Lavagens (Mês Atual)</h2>
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="text-align: left; background: #f8f8f8;">
+                    <th style="padding: 10px; border-bottom: 1px solid #ccc;">Chegada (Fila)</th>
+                    <th style="padding: 10px; border-bottom: 1px solid #ccc;">Colab. Externa</th>
+                    <th style="padding: 10px; border-bottom: 1px solid #ccc;">Colab. Interna</th>
+                    <th style="padding: 10px; border-bottom: 1px solid #ccc;">Pista</th>
+                    <th style="padding: 10px; border-bottom: 1px solid #ccc;">Saída</th>
+                    <th style="padding: 10px; border-bottom: 1px solid #ccc;">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for lavagem in lavagens_realizadas %}
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 10px;">{{ lavagem.horario_chegada|date:"H:i" }}</td>
+                    <td style="padding: 10px;">{{ lavagem.colaborador_externa.nome|default:"---" }}</td>
+                    <td style="padding: 10px;">{{ lavagem.colaborador_interna.nome|default:"---" }}</td>
+                    <td style="padding: 10px;">{{ lavagem.horario_pista|date:"H:i"|default:"---" }}</td>
+                    <td style="padding: 10px;">{{ lavagem.horario_saida|date:"H:i"|default:"---" }}</td>
+                    <td style="padding: 10px;">
+                        {% if not lavagem.horario_pista %}
+                            <form method="post" action="{% url 'mover_para_pista' lavagem.id %}" style="display: flex; gap: 5px;">
+                                {% csrf_token %}
+                                <select name="colaborador_externa" required style="padding: 2px;">
+                                    <option value="">Colab. Externa</option>
+                                    {% for c in colaboradores_list %}
+                                        <option value="{{ c.id }}">{{ c.nome }}</option>
+                                    {% endfor %}
+                                </select>
+                                <select name="colaborador_interna" style="padding: 2px;">
+                                    <option value="">Colab. Interna (Opcional)</option>
+                                    {% for c in colaboradores_list %}
+                                        <option value="{{ c.id }}">{{ c.nome }}</option>
+                                    {% endfor %}
+                                </select>
+                                <button type="submit" class="button" style="background-color: #28a745;">Iniciar</button>
+                            </form>
+                        {% elif not lavagem.horario_saida %}
+                            <form method="post" action="{% url 'finalizar_lavagem' lavagem.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="button" style="background-color: #dc3545;">Finalizar Lavagem</button>
+                            </form>
+                        {% else %}
+                            <span style="color: #28a745; font-weight: bold;">✅ Concluído</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="padding: 20px; text-align: center;">Nenhuma lavagem registada hoje.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
-
 </div>
+
+<style>
+    .module h2 { margin-top: 20px; padding: 10px; background: #79aec8; color: white; }
+    .button:disabled { background-color: #ccc !important; cursor: not-allowed; }
+    select { border: 1px solid #ccc; border-radius: 4px; }
+</style>
 {% endblock %}
