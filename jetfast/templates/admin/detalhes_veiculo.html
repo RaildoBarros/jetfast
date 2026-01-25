@@ -1,103 +1,134 @@
 {% extends 'admin/base_site.html' %}
 {% load static %}
 
-{% block title %}Detalhes do Veículo - {{ veiculo.nome }} - JetFast{% endblock %}
+{% block title %}Detalhes do Veículo - {{ veiculo.placa }} - JetFast{% endblock %}
 
 {% block branding %}
 <h1 id="site-name"><a href="{% url 'admin:index' %}">JetFast</a></h1>
 {% endblock %}
 
+{% block extrahead %}
+{{ block.super }}
+<style>
+    /* Definição de Cores */
+    :root {
+        --accent-color: #fdb02e;
+        --accent-dark: #e59a1f;
+        --admin-black: #000; /* Cor padrão do header do Django ou use #000 */
+    }
+
+    /* Mantém o Header padrão/preto */
+    #header {
+        background: #000 !important; /* Cor azulada padrão do Django ou mude para black */
+    }
+
+    /* Seções (Modules) com a cor de destaque #fdb02e */
+    .module h2 {
+        background: var(--accent-color) !important;
+        color: #000 !important;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    /* Botões com a cor de destaque */
+    .button, input[type=submit], .submit-row a.default {
+        background: var(--accent-color) !important;
+        color: #000 !important;
+        font-weight: bold;
+        border: none;
+    }
+
+    .button:hover {
+        background: var(--accent-dark) !important;
+        color: #000 !important;
+    }
+
+    /* Ajustes das Tabelas */
+    .info-table th {
+        background: #fdfdfd;
+        color: #555;
+        text-align: left;
+        width: 20%;
+        padding: 12px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .info-table td {
+        padding: 12px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .history-table thead th {
+        background: #f8f8f8;
+        border-bottom: 2px solid var(--accent-color);
+        padding: 12px;
+        text-align: left;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div id="content-main">
-    <h1>Detalhes do Veículo</h1>
-
-    {% if messages %}
-        <ul class="messagelist">
-            {% for message in messages %}
-                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-            {% endfor %}
-        </ul>
-    {% endif %}
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h1>Ficha do Veículo: <span style="color: var(--accent-dark);">{{ veiculo.placa }}</span></h1>
+        <a href="{% url 'admin:jetfast_veiculo_changelist' %}" class="button">Voltar</a>
+    </div>
 
     <div class="module">
-        <table style="width: 100%;">
-            <tr><th>Placa:</th><td><strong>{{ veiculo.placa }}</strong></td></tr>
-            <tr><th>Nome/Proprietário:</th><td>{{ veiculo.nome }}</td></tr>
-            <tr><th>Telefone:</th><td>{{ veiculo.telefone|default:"Não informado" }}</td></tr>
-            <tr><th>Veículo:</th><td>{{ veiculo.modelo_veiculo }}</td></tr>
-            <tr><th>Categoria:</th><td>{{ veiculo.categoria }} ({{ veiculo.categoria.quantidade_lavagens }} lavagens/mês)</td></tr>
+        <h2>Dados do Proprietário e Veículo</h2>
+        <table class="info-table" style="width: 100%; border-collapse: collapse;">
+            <tr>
+                <th>Proprietário:</th>
+                <td>{{ veiculo.nome }}</td>
+                <th>Telefone:</th>
+                <td>{{ veiculo.telefone|default:"Não informado" }}</td>
+            </tr>
+            <tr>
+                <th>Marca/Modelo:</th>
+                <td>{{ veiculo.modelo_veiculo.marca }} - {{ veiculo.modelo_veiculo.nome }}</td>
+                <th>Categoria:</th>
+                <td>{{ veiculo.categoria.nome }}</td>
+            </tr>
+            <tr>
+                <th>Data de Cadastro:</th>
+                <td colspan="3">{{ veiculo.data_cadastro|date:"d/m/Y \à\s H:i" }}</td>
+            </tr>
         </table>
     </div>
 
-    <div class="submit-row" style="margin: 20px 0;">
-    <form method="post" action="{% url 'registrar_lavagem' veiculo.id %}">
-        {% csrf_token %}
-        <input type="submit" value="Colocar na Fila" class="button">
-    </form>
-</div>
-
-    <div class="module">
-        <h2>Histórico de Lavagens (Mês Atual)</h2>
-        <table style="width: 100%; border-collapse: collapse;">
+    <div class="module" style="margin-top: 30px;">
+        <h2>Histórico Completo de Lavagens</h2>
+        <table class="history-table" style="width: 100%; border-collapse: collapse;">
             <thead>
-                <tr style="text-align: left; background: #f8f8f8;">
-                    <th style="padding: 10px; border-bottom: 1px solid #ccc;">Chegada (Fila)</th>
-                    <th style="padding: 10px; border-bottom: 1px solid #ccc;">Colab. Externa</th>
-                    <th style="padding: 10px; border-bottom: 1px solid #ccc;">Colab. Interna</th>
-                    <th style="padding: 10px; border-bottom: 1px solid #ccc;">Pista</th>
-                    <th style="padding: 10px; border-bottom: 1px solid #ccc;">Saída</th>
-                    <th style="padding: 10px; border-bottom: 1px solid #ccc;">Ações</th>
+                <tr>
+                    <th>Data</th>
+                    <th>Chegada</th>
+                    <th>Entrada Pista</th>
+                    <th>Saída Final</th>
+                    <th>Colab. Externa</th>
+                    <th>Colab. Interna</th>
                 </tr>
             </thead>
             <tbody>
                 {% for lavagem in lavagens_realizadas %}
                 <tr style="border-bottom: 1px solid #eee;">
-                    <td style="padding: 10px;">{{ lavagem.horario_chegada|date:"H:i" }}</td>
-                    <td style="padding: 10px;">{{ lavagem.colaborador_externa.nome|default:"---" }}</td>
-                    <td style="padding: 10px;">{{ lavagem.colaborador_interna.nome|default:"---" }}</td>
-                    <td style="padding: 10px;">{{ lavagem.horario_pista|date:"H:i"|default:"---" }}</td>
-                    <td style="padding: 10px;">{{ lavagem.horario_saida|date:"H:i"|default:"---" }}</td>
-                    <td style="padding: 10px;">
-                        {% if not lavagem.horario_pista %}
-                            <form method="post" action="{% url 'mover_para_pista' lavagem.id %}" style="display: flex; gap: 5px;">
-                                {% csrf_token %}
-                                <select name="colaborador_externa" required style="padding: 2px;">
-                                    <option value="">Colab. Externa</option>
-                                    {% for c in colaboradores_list %}
-                                        <option value="{{ c.id }}">{{ c.nome }}</option>
-                                    {% endfor %}
-                                </select>
-                                <select name="colaborador_interna" style="padding: 2px;">
-                                    <option value="">Colab. Interna (Opcional)</option>
-                                    {% for c in colaboradores_list %}
-                                        <option value="{{ c.id }}">{{ c.nome }}</option>
-                                    {% endfor %}
-                                </select>
-                                <button type="submit" class="button" style="background-color: #28a745;">Iniciar</button>
-                            </form>
-                        {% elif not lavagem.horario_saida %}
-                            <form method="post" action="{% url 'finalizar_lavagem' lavagem.id %}">
-                                {% csrf_token %}
-                                <button type="submit" class="button" style="background-color: #dc3545;">Finalizar Lavagem</button>
-                            </form>
-                        {% else %}
-                            <span style="color: #28a745; font-weight: bold;">✅ Concluído</span>
-                        {% endif %}
-                    </td>
+                    <td style="padding: 12px;"><strong>{{ lavagem.horario_chegada|date:"d/m/Y" }}</strong></td>
+                    <td style="padding: 12px;">{{ lavagem.horario_chegada|date:"H:i" }}</td>
+                    <td style="padding: 12px;">{{ lavagem.horario_pista|date:"H:i"|default:"---" }}</td>
+                    <td style="padding: 12px;">{{ lavagem.horario_saida|date:"H:i"|default:"---" }}</td>
+                    <td style="padding: 12px;">{{ lavagem.colaborador_externa.nome|default:"---" }}</td>
+                    <td style="padding: 12px;">{{ lavagem.colaborador_interna.nome|default:"---" }}</td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="6" style="padding: 20px; text-align: center;">Nenhuma lavagem registada hoje.</td>
+                    <td colspan="6" style="padding: 30px; text-align: center; color: #666;">
+                        Este veículo ainda não possui registros de lavagem.
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 </div>
-
-<style>
-    .module h2 { margin-top: 20px; padding: 10px; background: #79aec8; color: white; }
-    .button:disabled { background-color: #ccc !important; cursor: not-allowed; }
-    select { border: 1px solid #ccc; border-radius: 4px; }
-</style>
 {% endblock %}

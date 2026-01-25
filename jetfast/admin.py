@@ -3,7 +3,7 @@ from django.urls import reverse
 from django.utils.html import format_html
 from .models import Marca, ModeloVeiculo, Veiculo, Lavagem, Colaborador, Categoria
 
-# Single constant for the admin CSS path to avoid duplicating the literal
+
 CSS_ADMIN_PATH = 'admin/css/admin_logo.css'
 
 
