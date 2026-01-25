@@ -57,7 +57,13 @@ class Veiculo(models.Model):
     telefone = models.CharField(max_length=15, validators=[telefone_validator], help_text="Ex: 11 99999-9999",
                                 null=True, blank=True)
     modelo_veiculo = models.ForeignKey('ModeloVeiculo', on_delete=models.PROTECT, verbose_name="Veículo")
-    categoria = models.ForeignKey(Categoria, on_delete=models.CASCADE, verbose_name="Categoria")
+    categoria = models.ForeignKey(
+        Categoria,
+        on_delete=models.CASCADE,
+        verbose_name="Categoria",
+        null=True,
+        blank=True
+    )
     data_cadastro = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
