@@ -2,30 +2,42 @@ import os
 import django
 import random
 from datetime import datetime, timedelta
+from django.utils import timezone
 from faker import Faker
 
 # Configuração do ambiente Django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'configuration.settings')
 django.setup()
 
-from jetfast.models import Veiculo, Lavagem, Plano, ModeloVeiculo, Marca
+# Importação atualizada: Plano agora é Categoria
+from jetfast.models import Veiculo, Lavagem, Categoria, ModeloVeiculo, Marca, Colaborador
 
-fake = Faker()
+fake = Faker('pt_BR')  # Usando localidade Brasil para nomes e placas mais realistas
 
-def criar_dados_teste(n=1000):
+
+def criar_dados_teste(n=100):
     print(f"Iniciando a criação de {n} registros...")
 
-    # 1. Garantir que existam planos
-    planos = list(Plano.objects.all())
-    if not planos:
-        print("Crie alguns planos no Admin antes de rodar o script!")
-        return
+    # 1. Garantir que existam categorias
+    categorias = list(Categoria.objects.all())
+    if not categorias:
+        print("Criando categorias básicas...")
+        for nome in ['Pequeno', 'Médio', 'SUV', 'Picape']:
+            categorias.append(Categoria.objects.create(nome=nome))
 
-    # 2. Garantir que existam modelos de veículos e marcas
+    # 2. Garantir que existam colaboradores para as lavagens
+    colaboradores = list(Colaborador.objects.all())
+    if not colaboradores:
+        print("Criando colaboradores...")
+        for _ in range(5):
+            colaboradores.append(Colaborador.objects.create(nome=fake.name()))
+
+    # 3. Garantir que existam modelos e marcas
     marcas = list(Marca.objects.all())
     if not marcas:
-        for _ in range(5):
-            marcas.append(Marca.objects.create(nome=fake.company()))
+        for m in ['Toyota', 'Ford', 'Volkswagen', 'Fiat', 'Chevrolet']:
+            marcas.append(Marca.objects.create(nome=m))
+
     modelos = list(ModeloVeiculo.objects.all())
     if not modelos:
         for _ in range(10):
@@ -34,43 +46,56 @@ def criar_dados_teste(n=1000):
                 marca=random.choice(marcas)
             ))
 
-    # 3. Criar veículos fictícios se necessário
+    # 4. Criar ou atualizar veículos fictícios
     veiculos = list(Veiculo.objects.all())
-    placas_existentes = set(v.placa for v in veiculos)
-    if len(veiculos) < 50:
+    if len(veiculos) < 20:
         print("Criando veículos fictícios...")
-        for _ in range(50 - len(veiculos)):
-            placa = fake.unique.bothify(text='???-####').upper()
-            while placa in placas_existentes:
-                placa = fake.unique.bothify(text='???-####').upper()
-            veiculo = Veiculo.objects.create(
+        for _ in range(20):
+            # Formato de placa Mercosul ou antigo
+            placa = fake.bothify(text='???#?##').upper()
+            veiculos.append(Veiculo.objects.create(
                 placa=placa,
-                nome=fake.first_name(),
+                nome=fake.name(),
+                telefone=fake.cellphone_number(),
                 modelo_veiculo=random.choice(modelos),
-                plano=random.choice(planos)
-            )
-            veiculos.append(veiculo)
-            placas_existentes.add(placa)
+                categoria=random.choice(categorias)
+            ))
 
-    # 4. Gerar lavagens aleatórias entre 2025 e 2026
-    lavagens_para_criar = []
-    data_inicio = datetime(2025, 1, 1)
-    data_fim = datetime(2026, 12, 31)
-    delta_dias = (data_fim - data_inicio).days
-
+    # 5. Gerar lavagens com fluxos de horários realistas
+    print(f"Gerando {n} lavagens...")
     for i in range(n):
-        data_aleatoria = data_inicio + timedelta(days=random.randint(0, delta_dias))
-        veiculo_sorteado = random.choice(veiculos)
-        lavagem = Lavagem(
-            veiculo=veiculo_sorteado,
-            data_lavagem=data_aleatoria
-        )
-        lavagens_para_criar.append(lavagem)
-        if i % 200 == 0:
-            print(f"Preparando registro {i}...")
+        # Data aleatória nos últimos 30 dias
+        dias_atras = random.randint(0, 30)
+        data_base = timezone.now() - timedelta(days=dias_atras)
 
-    Lavagem.objects.bulk_create(lavagens_para_criar)
-    print(f"Sucesso! {n} lavagens inseridas no banco.")
+        # Horário de chegada aleatório entre 08:00 e 18:00
+        chegada = data_base.replace(hour=random.randint(8, 17), minute=random.randint(0, 59))
+
+        v = random.choice(veiculos)
+
+        # Simula o fluxo: Fila -> Pista -> Saída
+        lavagem = Lavagem.objects.create(
+            veiculo=v,
+            horario_chegada=chegada,
+            colaborador_externa=random.choice(colaboradores),
+            colaborador_interna=random.choice(colaboradores) if random.random() > 0.3 else None
+        )
+
+        # 80% das lavagens já entraram na pista
+        if random.random() > 0.2:
+            lavagem.horario_pista = chegada + timedelta(minutes=random.randint(10, 60))
+
+            # Dessas, 90% já foram finalizadas
+            if random.random() > 0.1:
+                lavagem.horario_saida = lavagem.horario_pista + timedelta(minutes=random.randint(30, 90))
+
+        lavagem.save()
+
+        if i % 10 == 0:
+            print(f"Registro {i} criado...")
+
+    print(f"Sucesso! Dados inseridos com sucesso.")
+
 
 if __name__ == '__main__':
-    criar_dados_teste(1000)
+    criar_dados_teste(50)
