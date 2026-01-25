@@ -7,40 +7,27 @@ import calendar
 
 
 def detalhes_veiculo(request, pk):
-    agora = timezone.now()
-
-    colaboradores_list = Colaborador.objects.all()
     veiculo = get_object_or_404(Veiculo, pk=pk)
-    lavagens_realizadas = Lavagem.objects.filter(veiculo=veiculo, horario_chegada__year=agora.year, horario_chegada__month=agora.month).order_by('-horario_chegada')
-    quantidade_lavagens_disponiveis = veiculo.plano.quantidade_lavagens - lavagens_realizadas.count()
+    colaboradores = Colaborador.objects.all()
+
+    lavagens_realizadas = Lavagem.objects.filter(
+        veiculo=veiculo
+    ).order_by('-horario_chegada')
+
     return render(request, 'admin/detalhes_veiculo.html', {
         'veiculo': veiculo,
         'lavagens_realizadas': lavagens_realizadas,
-        'quantidade_lavagens_disponiveis': quantidade_lavagens_disponiveis,
-        'colaboradores_list': colaboradores_list,
+        'colaboradores_list': colaboradores,
     })
 
 
 def registrar_lavagem(request, pk):
     veiculo = get_object_or_404(Veiculo, id=pk)
-    hoje = timezone.now()
-
-    # Validação de limite mensal baseada no horário de chegada
-    lavagens_no_mes = Lavagem.objects.filter(
-        veiculo=veiculo,
-        horario_chegada__year=hoje.year,
-        horario_chegada__month=hoje.month
-    ).count()
-
-    # if lavagens_no_mes >= veiculo.plano.quantidade_lavagens:
-    #     messages.error(request, "Não há mais lavagens disponíveis no mês.")
-    #     return redirect('detalhes_veiculo', pk=pk)
 
     if request.method == 'POST':
-        # Inicia a lavagem na "Fila"
+        # Registro direto, sem validação de quantidade
         Lavagem.objects.create(veiculo=veiculo, horario_chegada=timezone.now())
-        messages.success(request, "Veículo colocado na fila com sucesso.")
-        return redirect('detalhes_veiculo', pk=pk)
+        messages.success(request, "Veículo adicionado à fila!")
 
     return redirect('detalhes_veiculo', pk=pk)
 

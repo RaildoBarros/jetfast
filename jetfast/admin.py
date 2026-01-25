@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.urls import reverse
 from django.utils.html import format_html
-from .models import Marca, ModeloVeiculo, Veiculo, Plano, Lavagem, Colaborador
+from .models import Marca, ModeloVeiculo, Veiculo, Lavagem, Colaborador, Categoria
 
 # Single constant for the admin CSS path to avoid duplicating the literal
 CSS_ADMIN_PATH = 'admin/css/admin_logo.css'
@@ -14,9 +14,9 @@ class Media:
 admin.site.Media = Media
 
 
-@admin.register(Plano)
-class PlanoAdmin(admin.ModelAdmin):
-    list_display = ('nome', 'quantidade_lavagens')
+@admin.register(Categoria)
+class CategoriaAdmin(admin.ModelAdmin):
+    list_display = ('nome',)
     search_fields = ('nome',)
 
     class Media:
@@ -47,9 +47,9 @@ class ModeloVeiculoAdmin(admin.ModelAdmin):
 
 @admin.register(Veiculo)
 class VeiculoAdmin(admin.ModelAdmin):
-    list_display = ('placa', 'nome', 'telefone', 'modelo_veiculo', 'plano', 'ver_detalhes')
-    search_fields = ('placa', 'nome', 'telefone', 'modelo_veiculo', 'plano')
-    list_filter = ('plano', 'modelo_veiculo')
+    list_display = ('placa', 'nome', 'telefone', 'modelo_veiculo', 'categoria', 'ver_detalhes')
+    search_fields = ('placa', 'nome', 'telefone', 'modelo_veiculo', 'categoria')
+    list_filter = ('categoria', 'modelo_veiculo')
 
     def ver_detalhes(self, obj):
         url = reverse('detalhes_veiculo', args=[obj.id])

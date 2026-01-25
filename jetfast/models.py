@@ -15,13 +15,15 @@ class Colaborador(models.Model):
         verbose_name_plural = "Colaboradores"
 
 
-class Plano(models.Model):
+class Categoria(models.Model):
     nome = models.CharField(max_length=100, unique=True)
-    quantidade_lavagens = models.IntegerField()
 
     def __str__(self):
         return self.nome
 
+    class Meta:
+        verbose_name = "Categoria"
+        verbose_name_plural = "Categorias"
 
 class Marca(models.Model):
     nome = models.CharField(max_length=100, unique=True)
@@ -55,7 +57,7 @@ class Veiculo(models.Model):
     telefone = models.CharField(max_length=15, validators=[telefone_validator], help_text="Ex: 11 99999-9999",
                                 null=True, blank=True)
     modelo_veiculo = models.ForeignKey('ModeloVeiculo', on_delete=models.PROTECT, verbose_name="Veículo")
-    plano = models.ForeignKey(Plano, on_delete=models.CASCADE)
+    categoria = models.ForeignKey(Categoria, on_delete=models.CASCADE, verbose_name="Categoria")
     data_cadastro = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

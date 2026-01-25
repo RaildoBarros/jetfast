@@ -25,18 +25,16 @@
             <tr><th>Nome/Proprietário:</th><td>{{ veiculo.nome }}</td></tr>
             <tr><th>Telefone:</th><td>{{ veiculo.telefone|default:"Não informado" }}</td></tr>
             <tr><th>Veículo:</th><td>{{ veiculo.modelo_veiculo }}</td></tr>
-            <tr><th>Plano:</th><td>{{ veiculo.plano }} ({{ veiculo.plano.quantidade_lavagens }} lavagens/mês)</td></tr>
-            <tr><th>Lavagens Disponíveis:</th><td><strong>{{ quantidade_lavagens_disponiveis }}</strong></td></tr>
+            <tr><th>Categoria:</th><td>{{ veiculo.categoria }} ({{ veiculo.categoria.quantidade_lavagens }} lavagens/mês)</td></tr>
         </table>
     </div>
 
-    <div class="submit-row" style="display: flex; justify-content: flex-start; gap: 10px; margin: 20px 0;">
-        <a href="{% url 'admin:jetfast_veiculo_changelist' %}" class="button" style="background-color: #6c757d;">Voltar</a>
-        <form method="post" action="{% url 'registrar_lavagem' veiculo.id %}">
-            {% csrf_token %}
-            <input type="submit" value="Colocar na Fila" class="button" {% if quantidade_lavagens_disponiveis <= 0 %}disabled title="Sem lavagens disponíveis"{% endif %}>
-        </form>
-    </div>
+    <div class="submit-row" style="margin: 20px 0;">
+    <form method="post" action="{% url 'registrar_lavagem' veiculo.id %}">
+        {% csrf_token %}
+        <input type="submit" value="Colocar na Fila" class="button">
+    </form>
+</div>
 
     <div class="module">
         <h2>Histórico de Lavagens (Mês Atual)</h2>
