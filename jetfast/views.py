@@ -57,6 +57,8 @@ def acompanhamento_lavagens(request):
     hoje = timezone.now().date()
     lavagens_hoje = Lavagem.objects.filter(horario_chegada__date=hoje)
 
+    colaboradores = Colaborador.objects.filter(ativo=True).order_by('nome')
+
     # Contabilização precisa
     total_hoje = lavagens_hoje.count()
     em_fila = lavagens_hoje.filter(horario_pista__isnull=True).count()
@@ -68,7 +70,7 @@ def acompanhamento_lavagens(request):
 
     return render(request, 'admin/acompanhamento.html', {
         'lavagens': lavagens,
-        'colaboradores_list': Colaborador.objects.all().order_by('nome'),
+        'colaboradores_list': colaboradores,
         'stats': {
             'total': total_hoje,
             'fila': em_fila,

@@ -102,10 +102,20 @@ class LavagemAdmin(admin.ModelAdmin):
         return "Em Fila"
     get_status.short_description = 'Status'
 
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        """ Filtra colaboradores ativos nos campos de seleção do Admin """
+        if db_field.name in ["colaborador_externa", "colaborador_interna"]:
+            kwargs["queryset"] = Colaborador.objects.filter(ativo=True)
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
     class Media:
         css = {'all': (CSS_ADMIN_PATH,)}
 
 @admin.register(Colaborador)
 class ColaboradorAdmin(admin.ModelAdmin):
-    list_display = ('nome', 'data_cadastro')
+    list_display = ('nome', 'ativo', 'data_cadastro')
     search_fields = ('nome',)
+    list_filter = ('ativo',)
+
+    class Media:
+        css = {'all': (CSS_ADMIN_PATH,)}

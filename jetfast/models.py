@@ -6,6 +6,7 @@ from django.core.validators import RegexValidator
 class Colaborador(models.Model):
     nome = models.CharField(max_length=150, unique=True)
     data_cadastro = models.DateTimeField(auto_now_add=True)
+    ativo = models.BooleanField(default=True, verbose_name="Ativo")
 
     def __str__(self):
         return self.nome
