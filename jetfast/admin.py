@@ -39,6 +39,7 @@ class ModeloVeiculoAdmin(admin.ModelAdmin):
     list_display = ('nome', 'marca')
     search_fields = ('nome', 'marca__nome')
     list_filter = ('marca',)
+    autocomplete_fields = ['marca']
 
     class Media:
         css = {
@@ -48,21 +49,18 @@ class ModeloVeiculoAdmin(admin.ModelAdmin):
 @admin.register(Veiculo)
 class VeiculoAdmin(admin.ModelAdmin):
     list_display = ('placa', 'nome', 'telefone', 'modelo_veiculo', 'categoria', 'ver_detalhes')
-    search_fields = ('placa', 'nome', 'telefone', 'modelo_veiculo', 'categoria')
+    search_fields = ('placa', 'nome', 'telefone', 'modelo_veiculo__nome', 'categoria__nome')
     list_filter = ('categoria', 'modelo_veiculo')
+    autocomplete_fields = ['modelo_veiculo', 'categoria']  # Busca dinâmica nos formulários
 
     def ver_detalhes(self, obj):
         url = reverse('detalhes_veiculo', args=[obj.id])
         return format_html(
-            '<a href="{url}" style="display: flex; justify-content: center;"><img src="/static/admin/img/search.svg" alt="Ver Detalhes" style="width: 16px; height: 16px;"></a>',
+            '<a href="{url}" style="display: flex; justify-content: center;"><img src="/static/admin/img/search.svg" alt="Ver" style="width: 16px; height: 16px;"></a>',
             url=url,
         )
-    ver_detalhes.short_description = 'Detalhes'
 
-    class Media:
-        css = {
-            'all': (CSS_ADMIN_PATH,)
-        }
+    ver_detalhes.short_description = 'Detalhes'
 
 @admin.register(Lavagem)
 class LavagemAdmin(admin.ModelAdmin):
@@ -76,6 +74,7 @@ class LavagemAdmin(admin.ModelAdmin):
     )
     list_filter = ('horario_chegada', 'colaborador_externa', 'colaborador_interna')
     search_fields = ('veiculo__placa', 'veiculo__nome')
+    autocomplete_fields = ['veiculo', 'colaborador_externa', 'colaborador_interna']
 
     # Métodos para formatar as datas no padrão: 24/01/2026 às 14:58
     def chegada_formatada(self, obj):

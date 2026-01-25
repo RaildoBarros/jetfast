@@ -9,4 +9,5 @@ urlpatterns = [
     # Novas rotas para o fluxo
     path('lavagem/<int:lavagem_id>/pista/', views.mover_para_pista, name='mover_para_pista'),
     path('lavagem/<int:lavagem_id>/finalizar/', views.finalizar_lavagem, name='finalizar_lavagem'),
+    path('acompanhamento/', views.acompanhamento_lavagens, name='acompanhamento_lavagens'),
 ]

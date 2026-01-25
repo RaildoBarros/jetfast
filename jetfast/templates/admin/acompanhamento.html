@@ -1,0 +1,184 @@
+{% extends 'admin/base_site.html' %}
+{% block extrahead %}
+    <meta http-equiv="refresh" content="30">
+{% endblock %}
+
+{% block content %}
+<style>
+    /* Grid de Cards */
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+        padding: 20px 0;
+    }
+
+    /* Estilo Base do Card */
+    .card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        padding: 15px;
+        border-top: 10px solid #ccc;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        transition: transform 0.2s;
+    }
+
+    .card:hover { transform: translateY(-5px); }
+
+    /* Cores de Status */
+    .status-fila { border-top-color: #ffc107; background-color: #fffdf5; } /* Amarelo */
+    .status-pista { border-top-color: #28a745; background-color: #f6fff8; } /* Verde */
+    .status-concluido { border-top-color: #6c757d; opacity: 0.8; }
+
+    /* Conteúdo do Card */
+    .card-header { border-bottom: 1px solid #eee; margin-bottom: 10px; padding-bottom: 10px; }
+    .card-placa { font-size: 1.4em; font-weight: bold; color: #333; display: block; }
+    .card-modelo { color: #666; font-size: 0.9em; text-transform: uppercase; }
+
+    .card-body p { margin: 5px 0; font-size: 0.95em; color: #444; }
+    .label { font-weight: bold; color: #79aec8; font-size: 0.8em; text-transform: uppercase; }
+
+    .card-footer { margin-top: 15px; padding-top: 10px; border-top: 1px dotted #ccc; }
+
+    .btn-acao {
+        width: 100%;
+        padding: 10px;
+        border: none;
+        border-radius: 6px;
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    /* Modal (Mantido do anterior) */
+    .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); }
+    .modal-content { background: white; margin: 10% auto; padding: 25px; width: 350px; border-radius: 10px; }
+</style>
+
+<div id="content-main">
+    <h1>Painel Operacional JetFast</h1>
+
+<div style="display: flex; gap: 15px; margin-bottom: 25px; flex-wrap: wrap;">
+    <div class="module" style="padding: 15px; background: #fff; border-radius: 8px; flex: 1; min-width: 150px; text-align: center; border-bottom: 5px solid #79aec8;">
+        <span style="font-size: 0.8em; color: #666; display: block; font-weight: bold;">TOTAL HOJE</span>
+        <strong style="font-size: 2em; color: #333;">{{ stats.total }}</strong>
+    </div>
+
+    <div class="module" style="padding: 15px; background: #fff; border-radius: 8px; flex: 1; min-width: 150px; text-align: center; border-bottom: 5px solid #ffc107;">
+        <span style="font-size: 0.8em; color: #666; display: block; font-weight: bold;">AGUARDANDO (FILA)</span>
+        <strong style="font-size: 2em; color: #ffc107;">{{ stats.fila }}</strong>
+    </div>
+
+    <div class="module" style="padding: 15px; background: #fff; border-radius: 8px; flex: 1; min-width: 150px; text-align: center; border-bottom: 5px solid #28a745;">
+        <span style="font-size: 0.8em; color: #666; display: block; font-weight: bold;">LAVANDO (PISTA)</span>
+        <strong style="font-size: 2em; color: #28a745;">{{ stats.pista }}</strong>
+    </div>
+
+    <div class="module" style="padding: 15px; background: #fff; border-radius: 8px; flex: 1; min-width: 150px; text-align: center; border-bottom: 5px solid #6c757d;">
+        <span style="font-size: 0.8em; color: #666; display: block; font-weight: bold;">FINALIZADOS</span>
+        <strong style="font-size: 2em; color: #6c757d;">{{ stats.concluidos }}</strong>
+    </div>
+</div>
+
+    <div class="dashboard-grid">
+        {% for l in lavagens %}
+        <div class="card {% if not l.horario_pista %}status-fila{% elif not l.horario_saida %}status-pista{% else %}status-concluido{% endif %}">
+
+            <div class="card-header">
+                <span class="card-placa">{{ l.veiculo.placa }}</span>
+                <span class="card-modelo">{{ l.veiculo.modelo_veiculo.nome }}</span>
+            </div>
+
+            <div class="card-body">
+                <p><span class="label">Proprietário:</span> {{ l.veiculo.nome }}</p>
+                <p><span class="label">Chegada:</span> {{ l.horario_chegada|date:"H:i" }}</p>
+
+                {% if l.horario_pista %}
+                    <p><span class="label">Na Pista:</span> {{ l.horario_pista|date:"H:i" }}</p>
+                    <p><span class="label">Interna:</span> {{ l.colaborador_interna.nome }}</p>
+                    <p><span class="label">Externa:</span> {{ l.colaborador_externa.nome }}</p>
+                {% endif %}
+
+                {% if l.horario_saida %}
+                    <p><span class="label">Saída:</span> {{ l.horario_saida|date:"H:i" }}</p>
+                {% endif %}
+            </div>
+
+            <div class="card-footer">
+                {% if not l.horario_pista %}
+                    <button class="btn-acao" style="background: #28a745;"
+                            onclick="abrirModal('pista', {{ l.id }}, '{{ l.veiculo.placa }}')">
+                        INICIAR LAVAGEM
+                    </button>
+                {% elif not l.horario_saida %}
+                    <button class="btn-acao" style="background: #dc3545;"
+                            onclick="abrirModal('saida', {{ l.id }}, '{{ l.veiculo.placa }}')">
+                        FINALIZAR SERVIÇO
+                    </button>
+                {% else %}
+                    <div style="text-align: center; color: #28a745; font-weight: bold;">SERVIÇO CONCLUÍDO</div>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <p>Nenhum veículo em operação.</p>
+        {% endfor %}
+    </div>
+</div>
+
+<div id="modalAcao" class="modal">
+    <div class="modal-content">
+        <h3 id="modalTitulo">Ação</h3>
+        <p id="modalVeiculo"></p>
+        <form id="formAcao" method="post">
+            {% csrf_token %}
+            <input type="datetime-local" name="horario_custom" id="horario_input" required style="width:100%; margin-bottom:10px;">
+            <div id="sessaoColaboradores" style="display:none;">
+                <select name="colaborador_externa" id="sel_ext" style="width:100%; margin-bottom:10px;">
+                    <option value="">Colab. Externa</option>
+                    {% for c in colaboradores_list %}
+                        <option value="{{ c.id }}">{{ c.nome }}</option>
+                    {% endfor %}
+                </select>
+                <select name="colaborador_interna" style="width:100%; margin-bottom:10px;">
+                    <option value="">Colab. Interna</option>
+                    {% for c in colaboradores_list %}
+                        <option value="{{ c.id }}">{{ c.nome }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="button">Confirmar</button>
+            <button type="button" class="button" style="background:#666" onclick="fecharModal()">Sair</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    function abrirModal(tipo, id, placa) {
+        const agora = new Date();
+        agora.setMinutes(agora.getMinutes() - agora.getTimezoneOffset());
+        document.getElementById('horario_input').value = agora.toISOString().slice(0,16);
+        document.getElementById('modalVeiculo').innerText = "Veículo: " + placa;
+
+        const form = document.getElementById('formAcao');
+        const sessaoColab = document.getElementById('sessaoColaboradores');
+
+        if(tipo === 'pista') {
+            document.getElementById('modalTitulo').innerText = 'Entrada na Pista';
+            form.action = `/jetfast/lavagem/${id}/pista/`;
+            sessaoColab.style.display = 'block';
+            document.getElementById('sel_ext').required = false;
+        } else {
+            document.getElementById('modalTitulo').innerText = 'Finalizar Lavagem';
+            form.action = `/jetfast/lavagem/${id}/finalizar/`;
+            sessaoColab.style.display = 'none';
+            document.getElementById('sel_ext').required = false;
+        }
+        document.getElementById('modalAcao').style.display = 'block';
+    }
+    function fecharModal() { document.getElementById('modalAcao').style.display = 'none'; }
+</script>
+{% endblock %}
