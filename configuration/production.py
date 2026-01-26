@@ -100,6 +100,7 @@ DATABASES = {
         'PASSWORD': '29ra06il92do',                       # Substitua pela sua senha do MySQL
         'OPTIONS': {
             'charset': 'utf8mb4',
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
         },
     }
 }
@@ -149,3 +150,10 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 X_FRAME_OPTIONS = 'SAMEORIGIN'
+
+# Essencial para o CSRF funcionar em HTTPS no PythonAnywhere
+CSRF_TRUSTED_ORIGINS = ['https://raildo.pythonanywhere.com']
+
+# Garante que cookies de login funcionem em frames
+SESSION_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SAMESITE = 'Lax'

@@ -14,6 +14,7 @@ class Colaborador(models.Model):
     class Meta:
         verbose_name = "Colaborador"
         verbose_name_plural = "Colaboradores"
+        ordering = ['nome']
 
 
 class Categoria(models.Model):
