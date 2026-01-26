@@ -1,83 +1,192 @@
 {% extends 'admin/base_site.html' %}
 {% load static %}
 
+{% block extrastyle %}
+{{ block.super }}
+<style>
+    :root {
+        --primary-color: #fdb02e;
+        --primary-dark: #e59a1f;
+        --bg-body: #f4f7f6;
+    }
+
+    /* Estrutura do Painel */
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+        padding: 20px 0;
+    }
+
+    /* Stats Bar */
+    .stats-container {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 25px;
+        flex-wrap: wrap;
+    }
+    .stat-card {
+        padding: 15px;
+        background: #fff;
+        border-radius: 8px;
+        flex: 1;
+        min-width: 150px;
+        text-align: center;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    /* Estilo dos Cards */
+    .card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        padding: 15px;
+        border-top: 10px solid #ccc;
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.2s;
+    }
+    .card:hover { transform: translateY(-5px); }
+
+    .status-fila { border-top-color: #ffc107; background-color: #fffdf5; }
+    .status-pista { border-top-color: #28a745; background-color: #f6fff8; }
+    .status-concluido { border-top-color: #6c757d; opacity: 0.8; }
+
+    .card-header { border-bottom: 1px solid #eee; margin-bottom: 10px; padding-bottom: 10px; }
+    .card-placa { font-size: 1.5em; font-weight: bold; color: #333; }
+
+    .card-timestamps {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
+    .label { font-size: 0.75em; font-weight: bold; color: #888; text-transform: uppercase; display: block; }
+
+    .btn-acao {
+        width: 100%;
+        padding: 12px;
+        border: none;
+        border-radius: 6px;
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+        background: var(--primary-color);
+    }
+
+    /* Modal Genérico */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.6);
+        overflow-y: auto;
+    }
+    .modal-content {
+        background: white;
+        margin: 5% auto;
+        padding: 25px;
+        width: 90%;
+        max-width: 500px;
+        border-radius: 10px;
+        max-height: 85vh;
+        overflow-y: auto;
+    }
+
+    /* Formulário */
+    .form-group {
+        margin-bottom: 15px;
+    }
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+        color: #333;
+    }
+    .form-group input,
+    .form-group select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 14px;
+    }
+    .form-group input:focus,
+    .form-group select:focus {
+        outline: none;
+        border-color: var(--primary-color);
+    }
+    .form-group small {
+        display: block;
+        margin-top: 3px;
+        color: #666;
+        font-size: 12px;
+    }
+    .error-message {
+        color: #dc3545;
+        font-size: 13px;
+        margin-top: 5px;
+    }
+    .btn-container {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+    }
+    .btn-primary {
+        flex: 1;
+        padding: 12px;
+        background: var(--primary-color);
+        color: #000;
+        border: none;
+        border-radius: 6px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+    .btn-primary:hover {
+        background: var(--primary-dark);
+    }
+    .btn-secondary {
+        flex: 1;
+        padding: 12px;
+        background: #666;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+    .btn-secondary:hover {
+        background: #555;
+    }
+
+    /* Loading */
+    .loading {
+        display: none;
+        text-align: center;
+        padding: 20px;
+    }
+    .spinner {
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid var(--primary-color);
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+</style>
+{% endblock %}
+
 {% block extrahead %}
-    {{ block.super }}
-    <meta http-equiv="refresh" content="30">
-    <style>
-        :root {
-            --primary-color: #fdb02e;
-            --primary-dark: #e59a1f;
-            --bg-body: #f4f7f6;
-        }
-
-        /* Estrutura do Painel */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-            padding: 20px 0;
-        }
-
-        /* Stats Bar */
-        .stats-container {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 25px;
-            flex-wrap: wrap;
-        }
-        .stat-card {
-            padding: 15px;
-            background: #fff;
-            border-radius: 8px;
-            flex: 1;
-            min-width: 150px;
-            text-align: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-
-        /* Estilo dos Cards */
-        .card {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            padding: 15px;
-            border-top: 10px solid #ccc;
-            display: flex;
-            flex-direction: column;
-            transition: transform 0.2s;
-        }
-        .card:hover { transform: translateY(-5px); }
-
-        .status-fila { border-top-color: #ffc107; background-color: #fffdf5; }
-        .status-pista { border-top-color: #28a745; background-color: #f6fff8; }
-        .status-concluido { border-top-color: #6c757d; opacity: 0.8; }
-
-        .card-header { border-bottom: 1px solid #eee; margin-bottom: 10px; padding-bottom: 10px; }
-        .card-placa { font-size: 1.5em; font-weight: bold; color: #333; }
-
-        .card-timestamps {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-        }
-        .label { font-size: 0.75em; font-weight: bold; color: #888; text-transform: uppercase; display: block; }
-
-        .btn-acao {
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 6px;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-            background: var(--primary-color);
-        }
-
-        /* Modal */
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); }
-        .modal-content { background: white; margin: 10% auto; padding: 25px; width: 350px; border-radius: 10px; }
-    </style>
+{{ block.super }}
+<meta http-equiv="refresh" content="30">
 {% endblock %}
 
 {% block content %}
@@ -85,12 +194,11 @@
 
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
         <h1>Painel Operacional JetFast</h1>
-        <a href="{% url 'admin:jetfast_lavagem_add' %}?_popup=1"
-           class="button"
-           style="background: #28a745 !important; padding: 10px 20px;"
-           onclick="return showAddAnotherPopup(this);">
-           + NOVA LAVAGEM
-        </a>
+        <button onclick="abrirModalNovaLavagem()"
+                class="button"
+                style="background: #28a745 !important; padding: 10px 20px; cursor: pointer;">
+            + NOVA LAVAGEM
+        </button>
     </div>
 
     <div class="stats-container">
@@ -117,44 +225,42 @@
             </div>
 
             <div class="card-body">
-    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-bottom: 12px; border-bottom: 1px solid #eee; padding-bottom: 8px;">
-        <div>
-            <span class="label">Chegada</span>
-            <strong style="font-size: 0.9em;">{{ l.horario_chegada|date:"H:i" }}</strong>
-        </div>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-bottom: 12px; border-bottom: 1px solid #eee; padding-bottom: 8px;">
+                    <div>
+                        <span class="label">Chegada</span>
+                        <strong style="font-size: 0.9em;">{{ l.horario_chegada|date:"H:i" }}</strong>
+                    </div>
+                    <div style="text-align: center;">
+                        <span class="label">Pista</span>
+                        <strong style="font-size: 0.9em;">{{ l.horario_pista|date:"H:i"|default:"---" }}</strong>
+                    </div>
+                    <div style="text-align: right;">
+                        <span class="label">Saída</span>
+                        <strong style="font-size: 0.9em;">{{ l.horario_saida|date:"H:i"|default:"---" }}</strong>
+                    </div>
+                </div>
 
-        <div style="text-align: center;">
-            <span class="label">Pista</span>
-            <strong style="font-size: 0.9em;">{{ l.horario_pista|date:"H:i"|default:"---" }}</strong>
-        </div>
+                <p style="margin-bottom: 8px;"><span class="label">Cliente:</span> {{ l.veiculo.nome }}</p>
 
-        <div style="text-align: right;">
-            <span class="label">Saída</span>
-            <strong style="font-size: 0.9em;">{{ l.horario_saida|date:"H:i"|default:"---" }}</strong>
-        </div>
-    </div>
-
-    <p style="margin-bottom: 8px;"><span class="label">Cliente:</span> {{ l.veiculo.nome }}</p>
-
-    {% if l.horario_pista %}
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #f9f9f9; padding: 5px; border-radius: 4px;">
-        <div>
-            <span class="label">Externa</span>
-            <small style="display: block; line-height: 1.2;">{{ l.colaborador_externa.nome|default:"---" }}</small>
-        </div>
-        <div>
-            <span class="label">Interna</span>
-            <small style="display: block; line-height: 1.2;">{{ l.colaborador_interna.nome|default:"---" }}</small>
-        </div>
-    </div>
-    {% endif %}
-</div>
+                {% if l.horario_pista %}
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #f9f9f9; padding: 5px; border-radius: 4px;">
+                    <div>
+                        <span class="label">Externa</span>
+                        <small style="display: block; line-height: 1.2;">{{ l.colaborador_externa.nome|default:"---" }}</small>
+                    </div>
+                    <div>
+                        <span class="label">Interna</span>
+                        <small style="display: block; line-height: 1.2;">{{ l.colaborador_interna.nome|default:"---" }}</small>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
 
             <div style="margin-top: 15px;">
                 {% if not l.horario_pista %}
-                    <button class="btn-acao" onclick="abrirModal('pista', {{ l.id }}, '{{ l.veiculo.placa }}')">INICIAR</button>
+                    <button class="btn-acao" onclick="abrirModalAcao('pista', {{ l.id }}, '{{ l.veiculo.placa }}')">INICIAR</button>
                 {% elif not l.horario_saida %}
-                    <button class="btn-acao" style="background: #dc3545;" onclick="abrirModal('saida', {{ l.id }}, '{{ l.veiculo.placa }}')">FINALIZAR</button>
+                    <button class="btn-acao" style="background: #dc3545;" onclick="abrirModalAcao('saida', {{ l.id }}, '{{ l.veiculo.placa }}')">FINALIZAR</button>
                 {% else %}
                     <div style="text-align: center; color: #28a745; font-weight: bold; padding: 10px;">CONCLUÍDO ✓</div>
                 {% endif %}
@@ -164,47 +270,237 @@
     </div>
 </div>
 
+<!-- Modal: Nova Lavagem -->
+<div id="modalNovaLavagem" class="modal">
+    <div class="modal-content">
+        <h3 style="margin-bottom: 20px;">Nova Lavagem</h3>
+
+        <div id="formNovaLavagem">
+            <div class="form-group">
+                <label>Placa do Veículo *</label>
+                <input type="text"
+                       id="input_placa"
+                       placeholder="ABC-1234 ou ABC1D23"
+                       style="text-transform: uppercase;"
+                       maxlength="8">
+                <small>Digite a placa e pressione Enter ou clique em "Buscar"</small>
+                <div id="error_placa" class="error-message"></div>
+            </div>
+
+            <button type="button"
+                    onclick="buscarVeiculo()"
+                    class="btn-primary"
+                    style="width: 100%; margin-bottom: 20px;">
+                Buscar Veículo
+            </button>
+
+            <div id="loading_veiculo" class="loading">
+                <div class="spinner"></div>
+                <p>Buscando veículo...</p>
+            </div>
+
+            <div id="dados_veiculo" style="display: none;">
+                <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <h4 style="margin-top: 0;">Dados do Veículo</h4>
+                    <p><strong>Placa:</strong> <span id="veiculo_placa"></span></p>
+                    <p><strong>Proprietário:</strong> <span id="veiculo_nome"></span></p>
+                    <p><strong>Modelo:</strong> <span id="veiculo_modelo"></span></p>
+                    <p><strong>Telefone:</strong> <span id="veiculo_telefone"></span></p>
+                </div>
+
+                <div class="form-group">
+                    <label>Horário de Chegada *</label>
+                    <input type="datetime-local" id="input_horario_chegada" required>
+                </div>
+
+                <input type="hidden" id="veiculo_id">
+
+                <div class="btn-container">
+                    <button type="button" onclick="salvarNovaLavagem()" class="btn-primary">
+                        Registrar Lavagem
+                    </button>
+                    <button type="button" onclick="fecharModalNovaLavagem()" class="btn-secondary">
+                        Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="loading_salvar" class="loading">
+            <div class="spinner"></div>
+            <p>Salvando lavagem...</p>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Ação (Pista/Finalizar) -->
 <div id="modalAcao" class="modal">
     <div class="modal-content">
         <h3 id="modalTitulo">Ação</h3>
         <p id="modalVeiculo" style="font-weight: bold; color: var(--primary-dark);"></p>
         <form id="formAcao" method="post">
             {% csrf_token %}
-            <div style="margin-bottom: 15px;">
-                <label class="label">Horário:</label>
-                <input type="datetime-local" name="horario_custom" id="horario_input" required style="width: 100%; padding: 8px;">
+            <div class="form-group">
+                <label>Horário:</label>
+                <input type="datetime-local" name="horario_custom" id="horario_input" required>
             </div>
             <div id="sessaoColaboradores" style="display:none;">
-                <label class="label">Colaboradores:</label>
-                <select name="colaborador_externa" id="sel_ext" style="width: 100%; margin-bottom: 10px; padding: 8px;">
-                    <option value="">Selecione Externa...</option>
-                    {% for c in colaboradores_list %}<option value="{{ c.id }}">{{ c.nome }}</option>{% endfor %}
-                </select>
-                <select name="colaborador_interna" style="width: 100%; padding: 8px;">
-                    <option value="">Interna (Opcional)</option>
-                    {% for c in colaboradores_list %}<option value="{{ c.id }}">{{ c.nome }}</option>{% endfor %}
-                </select>
+                <div class="form-group">
+                    <label>Colaborador Externa:</label>
+                    <select name="colaborador_externa" id="sel_ext">
+                        <option value="">Selecione...</option>
+                        {% for c in colaboradores_list %}
+                        <option value="{{ c.id }}">{{ c.nome }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Colaborador Interna (Opcional):</label>
+                    <select name="colaborador_interna">
+                        <option value="">Nenhum</option>
+                        {% for c in colaboradores_list %}
+                        <option value="{{ c.id }}">{{ c.nome }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
             </div>
-            <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button type="submit" class="button" style="flex: 1;">Confirmar</button>
-                <button type="button" class="button" onclick="fecharModal()" style="flex: 1; background: #666 !important;">Sair</button>
+            <div class="btn-container">
+                <button type="submit" class="btn-primary">Confirmar</button>
+                <button type="button" onclick="fecharModalAcao()" class="btn-secondary">Cancelar</button>
             </div>
         </form>
     </div>
 </div>
 
+{% endblock %}
 
 {% block footer %}
-    {{ block.super }}
+{{ block.super }}
+
 <script>
-    function showAddAnotherPopup(link) {
-        var win = window.open(link.href, 'Nova Lavagem', 'height=600,width=800,resizable=yes,scrollbars=yes');
-        win.focus();
-        var timer = setInterval(function() { if(win.closed) { clearInterval(timer); location.reload(); } }, 500);
-        return false;
+// ========================================
+// Modal: Nova Lavagem
+// ========================================
+function abrirModalNovaLavagem() {
+    document.getElementById('modalNovaLavagem').style.display = 'block';
+    document.getElementById('input_placa').value = '';
+    document.getElementById('error_placa').textContent = '';
+    document.getElementById('dados_veiculo').style.display = 'none';
+    document.getElementById('input_placa').focus();
+
+    // Define horário atual
+    const agora = new Date();
+    const ano = agora.getFullYear();
+    const mes = String(agora.getMonth() + 1).padStart(2, '0');
+    const dia = String(agora.getDate()).padStart(2, '0');
+    const hora = String(agora.getHours()).padStart(2, '0');
+    const minuto = String(agora.getMinutes()).padStart(2, '0');
+    document.getElementById('input_horario_chegada').value = `${ano}-${mes}-${dia}T${hora}:${minuto}`;
+}
+
+function fecharModalNovaLavagem() {
+    document.getElementById('modalNovaLavagem').style.display = 'none';
+}
+
+// Buscar veículo pela placa
+async function buscarVeiculo() {
+    const placa = document.getElementById('input_placa').value.trim().toUpperCase();
+    const errorDiv = document.getElementById('error_placa');
+
+    errorDiv.textContent = '';
+
+    if (!placa) {
+        errorDiv.textContent = 'Por favor, digite uma placa';
+        return;
     }
 
-    function abrirModal(tipo, id, placa) {
+    document.getElementById('loading_veiculo').style.display = 'block';
+    document.getElementById('dados_veiculo').style.display = 'none';
+
+    try {
+        const response = await fetch(`/jetfast/api/buscar-veiculo/?placa=${encodeURIComponent(placa)}`);
+        const data = await response.json();
+
+        document.getElementById('loading_veiculo').style.display = 'none';
+
+        if (data.success) {
+            // Preenche os dados do veículo
+            document.getElementById('veiculo_id').value = data.veiculo.id;
+            document.getElementById('veiculo_placa').textContent = data.veiculo.placa;
+            document.getElementById('veiculo_nome').textContent = data.veiculo.nome;
+            document.getElementById('veiculo_modelo').textContent = data.veiculo.modelo;
+            document.getElementById('veiculo_telefone').textContent = data.veiculo.telefone || 'Não informado';
+            document.getElementById('dados_veiculo').style.display = 'block';
+        } else {
+            errorDiv.textContent = data.message || 'Veículo não encontrado';
+        }
+    } catch (error) {
+        document.getElementById('loading_veiculo').style.display = 'none';
+        errorDiv.textContent = 'Erro ao buscar veículo. Tente novamente.';
+        console.error('Erro:', error);
+    }
+}
+
+// Enter para buscar
+document.addEventListener('DOMContentLoaded', function() {
+    const inputPlaca = document.getElementById('input_placa');
+    if (inputPlaca) {
+        inputPlaca.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                buscarVeiculo();
+            }
+        });
+    }
+});
+
+// Salvar nova lavagem
+async function salvarNovaLavagem() {
+    const veiculoId = document.getElementById('veiculo_id').value;
+    const horarioChegada = document.getElementById('input_horario_chegada').value;
+
+    if (!veiculoId || !horarioChegada) {
+        alert('Preencha todos os campos obrigatórios');
+        return;
+    }
+
+    document.getElementById('formNovaLavagem').style.display = 'none';
+    document.getElementById('loading_salvar').style.display = 'block';
+
+    try {
+        const response = await fetch('/jetfast/api/criar-lavagem/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+                veiculo_id: veiculoId,
+                horario_chegada: horarioChegada
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            location.reload();
+        } else {
+            alert(data.message || 'Erro ao registrar lavagem');
+            document.getElementById('formNovaLavagem').style.display = 'block';
+            document.getElementById('loading_salvar').style.display = 'none';
+        }
+    } catch (error) {
+        alert('Erro ao salvar. Tente novamente.');
+        document.getElementById('formNovaLavagem').style.display = 'block';
+        document.getElementById('loading_salvar').style.display = 'none';
+        console.error('Erro:', error);
+    }
+}
+
+// ========================================
+// Modal: Ações (Pista/Finalizar)
+// ========================================
+function abrirModalAcao(tipo, id, placa) {
     const agora = new Date();
     const ano = agora.getFullYear();
     const mes = String(agora.getMonth() + 1).padStart(2, '0');
@@ -230,7 +526,39 @@
     document.getElementById('modalAcao').style.display = 'block';
 }
 
-    function fecharModal() { document.getElementById('modalAcao').style.display = 'none'; }
+function fecharModalAcao() {
+    document.getElementById('modalAcao').style.display = 'none';
+}
+
+// ========================================
+// Utilitários
+// ========================================
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Fecha modais ao clicar fora
+window.onclick = function(event) {
+    const modalNovaLavagem = document.getElementById('modalNovaLavagem');
+    const modalAcao = document.getElementById('modalAcao');
+
+    if (event.target === modalNovaLavagem) {
+        fecharModalNovaLavagem();
+    }
+    if (event.target === modalAcao) {
+        fecharModalAcao();
+    }
+}
 </script>
-{% endblock %}
 {% endblock %}
