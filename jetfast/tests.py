@@ -1,7 +1,7 @@
 from django.test import TestCase, Client
 from django.urls import reverse
 from django.contrib.messages import get_messages
-from .models import Plano, Marca, ModeloVeiculo, Veiculo, Lavagem
+from .models import Marca, ModeloVeiculo, Veiculo, Lavagem, Categoria
 from django.utils import timezone
 
 
@@ -9,14 +9,14 @@ class LavagemViewsTestCase(TestCase):
     def setUp(self):
         # Configuração inicial dos dados
         self.client = Client()
-        self.plano = Plano.objects.create(nome="Plano Básico", quantidade_lavagens=2)
+        self.categoria = Categoria.objects.create(nome="Padrão")
         self.marca = Marca.objects.create(nome="Fiat")
         self.modelo = ModeloVeiculo.objects.create(marca=self.marca, nome="Uno")
         self.veiculo = Veiculo.objects.create(
             placa="ABC1234",
             nome="Carro de Teste",
             modelo_veiculo=self.modelo,
-            plano=self.plano
+            categoria=self.categoria
         )
         self.url = reverse('registrar_lavagem', kwargs={'pk': self.veiculo.pk})
 
@@ -33,22 +33,6 @@ class LavagemViewsTestCase(TestCase):
         # Verifica mensagem de sucesso
         messages = list(get_messages(response.wsgi_request))
         self.assertEqual(str(messages[0]), "Lavagem registrada com sucesso.")
-
-    def test_bloqueio_limite_lavagens_excedido(self):
-        """Testa se o sistema impede o registro após atingir o limite do plano."""
-        # Criamos lavagens para atingir o limite (2 lavagens)
-        Lavagem.objects.create(veiculo=self.veiculo)
-        Lavagem.objects.create(veiculo=self.veiculo)
-
-        # Tenta registrar a terceira lavagem
-        response = self.client.post(self.url)
-
-        # Não deve ter criado a terceira no banco
-        self.assertEqual(Lavagem.objects.count(), 2)
-
-        # Verifica mensagem de erro
-        messages = list(get_messages(response.wsgi_request))
-        self.assertEqual(str(messages[0]), "Não há mais lavagens disponíveis no mês.")
 
     def test_lavagens_meses_diferentes(self):
         """Testa se lavagens de meses anteriores não interferem no limite do mês atual."""

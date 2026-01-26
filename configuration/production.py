@@ -94,10 +94,10 @@ WSGI_APPLICATION = 'configuration.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'HOST': 'raildo.mysql.pythonanywhere-services.com',  # Substitua pelo seu hostname
-        'NAME': 'raildo$jetfast',                     # Substitua pelo nome do seu banco de dados
-        'USER': 'raildo',                             # Substitua pelo seu username
-        'PASSWORD': '29ra06il92do',                       # Substitua pela sua senha do MySQL
+        'HOST': os.environ.get('DB_HOST'),
+        'NAME': os.environ.get('DB_NAME'),
+        'USER': os.environ.get('DB_USER'),
+        'PASSWORD': os.environ.get('DB_PASSWORD'),
         'OPTIONS': {
             'charset': 'utf8mb4',
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
@@ -152,7 +152,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 X_FRAME_OPTIONS = 'SAMEORIGIN'
 
 # Essencial para o CSRF funcionar em HTTPS no PythonAnywhere
-CSRF_TRUSTED_ORIGINS = ['https://raildo.pythonanywhere.com']
+CSRF_TRUSTED_ORIGINS = ['https://raildo.pythonanywhere.com', 'https://jetfast.pythonanywhere.com']
 
 # Garante que cookies de login funcionem em frames
 SESSION_COOKIE_SAMESITE = 'Lax'

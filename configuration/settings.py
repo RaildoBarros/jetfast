@@ -161,3 +161,5 @@ CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:8000/']
 # Garante que cookies de login funcionem em frames
 SESSION_COOKIE_SAMESITE = 'Lax'
 CSRF_COOKIE_SAMESITE = 'Lax'
+
+SECURE_CROSS_ORIGIN_OPENER_POLICY = None

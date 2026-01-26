@@ -3,6 +3,7 @@ from django.contrib import messages
 from .models import Veiculo, Lavagem, Colaborador
 from django.utils import timezone
 from django.db.models import Q
+from django.contrib.auth.decorators import login_required, permission_required
 
 
 def detalhes_veiculo(request, pk):
@@ -31,6 +32,8 @@ def registrar_lavagem(request, pk):
     return redirect('detalhes_veiculo', pk=pk)
 
 
+@login_required
+@permission_required('jetfast.change_lavagem')
 def mover_para_pista(request, lavagem_id):
     if request.method == 'POST':
         lavagem = get_object_or_404(Lavagem, id=lavagem_id)
@@ -43,6 +46,8 @@ def mover_para_pista(request, lavagem_id):
         return redirect('acompanhamento_lavagens')
 
 
+@login_required
+@permission_required('jetfast.change_lavagem')
 def finalizar_lavagem(request, lavagem_id):
     if request.method == 'POST':
         lavagem = get_object_or_404(Lavagem, id=lavagem_id)
@@ -53,6 +58,8 @@ def finalizar_lavagem(request, lavagem_id):
         return redirect('acompanhamento_lavagens')
 
 
+@login_required
+@permission_required('jetfast.view_lavagem')
 def acompanhamento_lavagens(request):
     hoje = timezone.now().date()
     lavagens_hoje = Lavagem.objects.filter(horario_chegada__date=hoje)

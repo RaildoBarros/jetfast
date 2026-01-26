@@ -2,6 +2,7 @@
 {% load static %}
 
 {% block extrahead %}
+    {{ block.super }}
     <meta http-equiv="refresh" content="30">
     <style>
         :root {
@@ -192,7 +193,9 @@
     </div>
 </div>
 
-<script type="text/javascript" src="/static/admin/js/admin/RelatedObjectLookups.js"></script>
+
+{% block footer %}
+    {{ block.super }}
 <script>
     function showAddAnotherPopup(link) {
         var win = window.open(link.href, 'Nova Lavagem', 'height=600,width=800,resizable=yes,scrollbars=yes');
@@ -202,25 +205,32 @@
     }
 
     function abrirModal(tipo, id, placa) {
-        const agora = new Date();
-        agora.setMinutes(agora.getMinutes() - agora.getTimezoneOffset());
-        document.getElementById('horario_input').value = agora.toISOString().slice(0,16);
-        document.getElementById('modalVeiculo').innerText = "Placa: " + placa;
-        const form = document.getElementById('formAcao');
-        const sessaoColab = document.getElementById('sessaoColaboradores');
+    const agora = new Date();
+    const ano = agora.getFullYear();
+    const mes = String(agora.getMonth() + 1).padStart(2, '0');
+    const dia = String(agora.getDate()).padStart(2, '0');
+    const hora = String(agora.getHours()).padStart(2, '0');
+    const minuto = String(agora.getMinutes()).padStart(2, '0');
+    const localISO = `${ano}-${mes}-${dia}T${hora}:${minuto}`;
 
-        if(tipo === 'pista') {
-            document.getElementById('modalTitulo').innerText = 'Entrada na Pista';
-            form.action = `/jetfast/lavagem/${id}/pista/`;
-            sessaoColab.style.display = 'block';
-        } else {
-            document.getElementById('modalTitulo').innerText = 'Finalizar Saída';
-            form.action = `/jetfast/lavagem/${id}/finalizar/`;
-            sessaoColab.style.display = 'none';
-        }
-        document.getElementById('modalAcao').style.display = 'block';
+    document.getElementById('horario_input').value = localISO;
+    document.getElementById('modalVeiculo').innerText = "Placa: " + placa;
+    const form = document.getElementById('formAcao');
+    const sessaoColab = document.getElementById('sessaoColaboradores');
+
+    if(tipo === 'pista') {
+        document.getElementById('modalTitulo').innerText = 'Entrada na Pista';
+        form.action = `/jetfast/lavagem/${id}/pista/`;
+        sessaoColab.style.display = 'block';
+    } else {
+        document.getElementById('modalTitulo').innerText = 'Finalizar Saída';
+        form.action = `/jetfast/lavagem/${id}/finalizar/`;
+        sessaoColab.style.display = 'none';
     }
+    document.getElementById('modalAcao').style.display = 'block';
+}
 
     function fecharModal() { document.getElementById('modalAcao').style.display = 'none'; }
 </script>
+{% endblock %}
 {% endblock %}
