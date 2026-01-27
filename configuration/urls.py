@@ -18,9 +18,11 @@ from django.contrib import admin
 from django.urls import path, include
 from django.shortcuts import redirect
 from django.conf import settings
+from django.views.generic import RedirectView
 
 urlpatterns = [
-    path('', lambda request: redirect('admin:jetfast_veiculo_changelist'), name='home'),
+    # path('', lambda request: redirect('admin:jetfast_veiculo_changelist'), name='home'),
+    path('', RedirectView.as_view(url='/jetfast/acompanhamento/', permanent=True)),
     path('admin/', admin.site.urls),
     path('jetfast/', include('jetfast.urls')),
 ]

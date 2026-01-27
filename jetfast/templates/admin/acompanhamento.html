@@ -347,7 +347,7 @@
             <div id="sessaoColaboradores" style="display:none;">
                 <div class="form-group">
                     <label>Colaborador Externa:</label>
-                    <select name="colaborador_externa" id="sel_ext">
+                    <select style="height: 40px;" name="colaborador_externa" id="sel_ext">
                         <option value="">Selecione...</option>
                         {% for c in colaboradores_list %}
                         <option value="{{ c.id }}">{{ c.nome }}</option>
@@ -355,9 +355,9 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Colaborador Interna (Opcional):</label>
-                    <select name="colaborador_interna">
-                        <option value="">Nenhum</option>
+                    <label>Colaborador Interna:</label>
+                    <select style="height: 40px;" name="colaborador_interna">
+                        <option value="">Selecione...</option>
                         {% for c in colaboradores_list %}
                         <option value="{{ c.id }}">{{ c.nome }}</option>
                         {% endfor %}
