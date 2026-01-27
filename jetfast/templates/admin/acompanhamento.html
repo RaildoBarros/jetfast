@@ -109,6 +109,7 @@
     .form-group input,
     .form-group select {
         width: 100%;
+        height: 40px;
         padding: 10px;
         border: 1px solid #ddd;
         border-radius: 5px;
@@ -210,7 +211,36 @@
 
 {% block extrahead %}
 {{ block.super }}
-<meta http-equiv="refresh" content="30">
+<script>
+// Pausa o auto-refresh quando modais estão abertos
+// let autoRefreshEnabled = true;
+// let refreshInterval = null;
+
+function pauseAutoRefresh() {
+    autoRefreshEnabled = false;
+    if (refreshInterval) {
+        clearInterval(refreshInterval);
+        refreshInterval = null;
+    }
+}
+
+function resumeAutoRefresh() {
+    autoRefreshEnabled = true;
+    startAutoRefresh();
+}
+
+function startAutoRefresh() {
+    if (refreshInterval) clearInterval(refreshInterval);
+    refreshInterval = setInterval(() => {
+        if (autoRefreshEnabled) {
+            location.reload();
+        }
+    }, 30000);
+}
+
+// Inicia o auto-refresh
+startAutoRefresh();
+</script>
 {% endblock %}
 
 {% block content %}
@@ -218,11 +248,18 @@
 
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
         <h1>Painel Operacional JetFast</h1>
-        <button onclick="abrirModalNovaLavagem()"
-                class="button"
-                style="background: #28a745 !important; padding: 10px 20px; cursor: pointer;">
-            + NOVA LAVAGEM
-        </button>
+        <div style="display: flex; gap: 10px;">
+            <button onclick="abrirModalNovaLavagem()"
+                    class="button"
+                    style="background: #28a745 !important; padding: 10px 20px; cursor: pointer;">
+                + NOVA LAVAGEM
+            </button>
+            <button onclick="abrirFormularioCadastroRapido()"
+                    class="button"
+                    style="background: #007bff !important; padding: 10px 20px; cursor: pointer;">
+                + CADASTRAR VEÍCULO
+            </button>
+        </div>
     </div>
 
     <div class="stats-container">
@@ -282,11 +319,20 @@
 
             <div style="margin-top: 15px;">
                 {% if not l.horario_pista %}
-                    <button class="btn-acao" onclick="abrirModalAcao('pista', {{ l.id }}, '{{ l.veiculo.placa }}')">INICIAR</button>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
+                        <button class="btn-acao" onclick="abrirModalAcao('pista', {{ l.id }}, '{{ l.veiculo.placa }}')">INICIAR</button>
+                        <button class="btn-acao" style="background: #6c757d;" onclick="abrirModalEditarLavagem({{ l.id }})">EDITAR</button>
+                    </div>
                 {% elif not l.horario_saida %}
-                    <button class="btn-acao" style="background: #dc3545;" onclick="abrirModalAcao('saida', {{ l.id }}, '{{ l.veiculo.placa }}')">FINALIZAR</button>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
+                        <button class="btn-acao" style="background: #dc3545;" onclick="abrirModalAcao('saida', {{ l.id }}, '{{ l.veiculo.placa }}')">FINALIZAR</button>
+                        <button class="btn-acao" style="background: #6c757d;" onclick="abrirModalEditarLavagem({{ l.id }})">EDITAR</button>
+                    </div>
                 {% else %}
-                    <div style="text-align: center; color: #28a745; font-weight: bold; padding: 10px;">CONCLUÍDO ✓</div>
+                    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 5px;">
+                        <div style="text-align: center; color: #28a745; font-weight: bold; padding: 10px;">CONCLUÍDO ✓</div>
+                        <button class="btn-acao" style="background: #6c757d;" onclick="abrirModalEditarLavagem({{ l.id }})">EDITAR</button>
+                    </div>
                 {% endif %}
             </div>
         </div>
@@ -455,6 +501,77 @@
     </div>
 </div>
 
+<!-- Modal: Editar Lavagem -->
+<div id="modalEditarLavagem" class="modal">
+    <div class="modal-content">
+        <h3>Editar Lavagem</h3>
+
+        <div id="formEditarLavagem">
+            <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                <h4 style="margin-top: 0;">Veículo</h4>
+                <p><strong>Placa:</strong> <span id="edit_veiculo_placa"></span></p>
+                <p><strong>Proprietário:</strong> <span id="edit_veiculo_nome"></span></p>
+            </div>
+
+            <div class="form-group">
+                <label>Horário de Chegada:</label>
+                <input type="datetime-local" id="edit_horario_chegada">
+            </div>
+
+            <div class="form-group">
+                <label>Horário na Pista:</label>
+                <input type="datetime-local" id="edit_horario_pista">
+                <small>Deixe vazio se ainda não foi para a pista</small>
+            </div>
+
+            <div class="form-group">
+                <label>Horário de Saída:</label>
+                <input type="datetime-local" id="edit_horario_saida">
+                <small>Deixe vazio se ainda não finalizou</small>
+            </div>
+
+            <div class="form-group">
+                <label>Colaborador Externa:</label>
+                <select id="edit_colaborador_externa">
+                    <option value="">Nenhum</option>
+                    {% for c in colaboradores_list %}
+                    <option value="{{ c.id }}">{{ c.nome }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Colaborador Interna:</label>
+                <select id="edit_colaborador_interna">
+                    <option value="">Nenhum</option>
+                    {% for c in colaboradores_list %}
+                    <option value="{{ c.id }}">{{ c.nome }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <input type="hidden" id="edit_lavagem_id">
+
+            <div class="btn-container">
+                <button type="button" onclick="salvarEdicaoLavagem()" class="btn-primary">
+                    Salvar Alterações
+                </button>
+                <button type="button" onclick="excluirLavagem()" class="btn-secondary" style="background: #dc3545;">
+                    Excluir
+                </button>
+                <button type="button" onclick="fecharModalEditarLavagem()" class="btn-secondary">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+
+        <div id="loading_editar" class="loading" style="display: none;">
+            <div class="spinner"></div>
+            <p>Salvando...</p>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
 
 {% block footer %}
@@ -462,11 +579,43 @@
 
 <script>
 // ========================================
+// Auto-refresh Control
+// ========================================
+let autoRefreshEnabled = true;
+let refreshInterval = null;
+
+function pauseAutoRefresh() {
+    autoRefreshEnabled = false;
+    if (refreshInterval) {
+        clearInterval(refreshInterval);
+        refreshInterval = null;
+    }
+}
+
+function resumeAutoRefresh() {
+    autoRefreshEnabled = true;
+    startAutoRefresh();
+}
+
+function startAutoRefresh() {
+    if (refreshInterval) clearInterval(refreshInterval);
+    refreshInterval = setInterval(() => {
+        if (autoRefreshEnabled) {
+            location.reload();
+        }
+    }, 30000);
+}
+
+// Inicia o auto-refresh
+startAutoRefresh();
+
+// ========================================
 // Modal: Nova Lavagem
 // ========================================
 let buscaTimeout = null;
 
 function abrirModalNovaLavagem() {
+    pauseAutoRefresh();
     document.getElementById('modalNovaLavagem').style.display = 'block';
     document.getElementById('input_busca').value = '';
     document.getElementById('error_busca').textContent = '';
@@ -489,6 +638,7 @@ function abrirModalNovaLavagem() {
 
 function fecharModalNovaLavagem() {
     document.getElementById('modalNovaLavagem').style.display = 'none';
+    resumeAutoRefresh();
 }
 
 // Busca com debounce
@@ -601,7 +751,10 @@ async function salvarNovaLavagem() {
         const data = await response.json();
 
         if (data.success) {
-            location.reload();
+            // Atualiza apenas os dados da página sem recarregar
+            await atualizarDadosPagina();
+            fecharModalNovaLavagem();
+            document.getElementById('loading_salvar').style.display = 'none';
         } else {
             alert(data.message || 'Erro ao registrar lavagem');
             document.getElementById('formNovaLavagem').style.display = 'block';
@@ -618,6 +771,11 @@ async function salvarNovaLavagem() {
 // ========================================
 // Cadastro de Novo Veículo
 // ========================================
+function abrirFormularioCadastroRapido() {
+    abrirModalNovaLavagem();
+    setTimeout(() => abrirFormularioCadastro(), 100);
+}
+
 async function abrirFormularioCadastro() {
     document.getElementById('formNovaLavagem').style.display = 'none';
     document.getElementById('formCadastroVeiculo').style.display = 'block';
@@ -754,10 +912,14 @@ async function salvarNovoVeiculo() {
             const dataLavagem = await responseLavagem.json();
 
             if (dataLavagem.success) {
-                location.reload();
+                await atualizarDadosPagina();
+                fecharModalNovaLavagem();
+                document.getElementById('loading_salvar').style.display = 'none';
             } else {
                 alert('Veículo cadastrado, mas erro ao registrar lavagem: ' + dataLavagem.message);
-                location.reload();
+                await atualizarDadosPagina();
+                fecharModalNovaLavagem();
+                document.getElementById('loading_salvar').style.display = 'none';
             }
         } else {
             alert(data.message || 'Erro ao cadastrar veículo');
@@ -773,9 +935,166 @@ async function salvarNovoVeiculo() {
 }
 
 // ========================================
+// Editar Lavagem
+// ========================================
+async function abrirModalEditarLavagem(lavagemId) {
+    pauseAutoRefresh();
+    document.getElementById('modalEditarLavagem').style.display = 'block';
+    document.getElementById('loading_editar').style.display = 'block';
+    document.getElementById('formEditarLavagem').style.display = 'none';
+
+    try {
+        const response = await fetch(`/jetfast/api/obter-lavagem/${lavagemId}/`);
+        const data = await response.json();
+
+        if (data.success) {
+            const lavagem = data.lavagem;
+
+            document.getElementById('edit_lavagem_id').value = lavagem.id;
+            document.getElementById('edit_veiculo_placa').textContent = lavagem.veiculo.placa;
+            document.getElementById('edit_veiculo_nome').textContent = lavagem.veiculo.nome;
+
+            document.getElementById('edit_horario_chegada').value = lavagem.horario_chegada || '';
+            document.getElementById('edit_horario_pista').value = lavagem.horario_pista || '';
+            document.getElementById('edit_horario_saida').value = lavagem.horario_saida || '';
+
+            document.getElementById('edit_colaborador_externa').value = lavagem.colaborador_externa_id || '';
+            document.getElementById('edit_colaborador_interna').value = lavagem.colaborador_interna_id || '';
+
+            document.getElementById('loading_editar').style.display = 'none';
+            document.getElementById('formEditarLavagem').style.display = 'block';
+        } else {
+            alert('Erro ao carregar dados da lavagem');
+            fecharModalEditarLavagem();
+        }
+    } catch (error) {
+        alert('Erro ao carregar lavagem');
+        console.error('Erro:', error);
+        fecharModalEditarLavagem();
+    }
+}
+
+function fecharModalEditarLavagem() {
+    document.getElementById('modalEditarLavagem').style.display = 'none';
+    resumeAutoRefresh();
+}
+
+async function salvarEdicaoLavagem() {
+    const lavagemId = document.getElementById('edit_lavagem_id').value;
+    const horarioChegada = document.getElementById('edit_horario_chegada').value;
+    const horarioPista = document.getElementById('edit_horario_pista').value;
+    const horarioSaida = document.getElementById('edit_horario_saida').value;
+    const colaboradorExternaId = document.getElementById('edit_colaborador_externa').value;
+    const colaboradorInternaId = document.getElementById('edit_colaborador_interna').value;
+
+    if (!horarioChegada) {
+        alert('O horário de chegada é obrigatório');
+        return;
+    }
+
+    document.getElementById('formEditarLavagem').style.display = 'none';
+    document.getElementById('loading_editar').style.display = 'block';
+
+    try {
+        const response = await fetch(`/jetfast/api/atualizar-lavagem/${lavagemId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+                horario_chegada: horarioChegada,
+                horario_pista: horarioPista || null,
+                horario_saida: horarioSaida || null,
+                colaborador_externa_id: colaboradorExternaId || null,
+                colaborador_interna_id: colaboradorInternaId || null
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            await atualizarDadosPagina();
+            fecharModalEditarLavagem();
+        } else {
+            alert(data.message || 'Erro ao atualizar lavagem');
+            document.getElementById('formEditarLavagem').style.display = 'block';
+            document.getElementById('loading_editar').style.display = 'none';
+        }
+    } catch (error) {
+        alert('Erro ao salvar alterações');
+        document.getElementById('formEditarLavagem').style.display = 'block';
+        document.getElementById('loading_editar').style.display = 'none';
+        console.error('Erro:', error);
+    }
+}
+
+async function excluirLavagem() {
+    if (!confirm('Tem certeza que deseja excluir esta lavagem?')) {
+        return;
+    }
+
+    const lavagemId = document.getElementById('edit_lavagem_id').value;
+
+    document.getElementById('formEditarLavagem').style.display = 'none';
+    document.getElementById('loading_editar').style.display = 'block';
+
+    try {
+        const response = await fetch(`/jetfast/api/excluir-lavagem/${lavagemId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            await atualizarDadosPagina();
+            fecharModalEditarLavagem();
+        } else {
+            alert(data.message || 'Erro ao excluir lavagem');
+            document.getElementById('formEditarLavagem').style.display = 'block';
+            document.getElementById('loading_editar').style.display = 'none';
+        }
+    } catch (error) {
+        alert('Erro ao excluir lavagem');
+        document.getElementById('formEditarLavagem').style.display = 'block';
+        document.getElementById('loading_editar').style.display = 'none';
+        console.error('Erro:', error);
+    }
+}
+
+// ========================================
+// Atualizar Dados da Página sem Reload
+// ========================================
+async function atualizarDadosPagina() {
+    try {
+        const response = await fetch('/jetfast/api/obter-lavagens-hoje/');
+        const data = await response.json();
+
+        if (data.success) {
+            // Atualiza estatísticas
+            document.querySelector('.stat-card:nth-child(1) strong').textContent = data.stats.total;
+            document.querySelector('.stat-card:nth-child(2) strong').textContent = data.stats.fila;
+            document.querySelector('.stat-card:nth-child(3) strong').textContent = data.stats.pista;
+
+            // Recarrega os cards (solução simples: reload da página)
+            // Em uma implementação mais avançada, reconstruiríamos os cards via JS
+            location.reload();
+        }
+    } catch (error) {
+        console.error('Erro ao atualizar dados:', error);
+        location.reload();
+    }
+}
+
+// ========================================
 // Modal: Ações (Pista/Finalizar)
 // ========================================
 function abrirModalAcao(tipo, id, placa) {
+    pauseAutoRefresh();
     const agora = new Date();
     const ano = agora.getFullYear();
     const mes = String(agora.getMonth() + 1).padStart(2, '0');
@@ -803,6 +1122,7 @@ function abrirModalAcao(tipo, id, placa) {
 
 function fecharModalAcao() {
     document.getElementById('modalAcao').style.display = 'none';
+    resumeAutoRefresh();
 }
 
 // ========================================
@@ -827,12 +1147,16 @@ function getCookie(name) {
 window.onclick = function(event) {
     const modalNovaLavagem = document.getElementById('modalNovaLavagem');
     const modalAcao = document.getElementById('modalAcao');
+    const modalEditarLavagem = document.getElementById('modalEditarLavagem');
 
     if (event.target === modalNovaLavagem) {
         fecharModalNovaLavagem();
     }
     if (event.target === modalAcao) {
         fecharModalAcao();
+    }
+    if (event.target === modalEditarLavagem) {
+        fecharModalEditarLavagem();
     }
 }
 </script>

@@ -18,4 +18,10 @@ urlpatterns = [
     path('api/listar-marcas/', views.listar_marcas, name='api_listar_marcas'),
     path('api/listar-modelos/', views.listar_modelos, name='api_listar_modelos'),
     path('api/listar-categorias/', views.listar_categorias, name='api_listar_categorias'),
+
+    # API Endpoints para edição
+    path('api/obter-lavagem/<int:lavagem_id>/', views.obter_lavagem, name='api_obter_lavagem'),
+    path('api/atualizar-lavagem/<int:lavagem_id>/', views.atualizar_lavagem, name='api_atualizar_lavagem'),
+    path('api/excluir-lavagem/<int:lavagem_id>/', views.excluir_lavagem, name='api_excluir_lavagem'),
+    path('api/obter-lavagens-hoje/', views.obter_lavagens_hoje, name='api_obter_lavagens_hoje'),
 ]

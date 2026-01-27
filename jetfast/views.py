@@ -307,3 +307,139 @@ def criar_lavagem(request):
             'success': False,
             'message': f'Erro ao criar lavagem: {str(e)}'
         }, status=500)
+
+
+@require_http_methods(["GET"])
+def obter_lavagem(request, lavagem_id):
+    """Obtém os dados de uma lavagem específica"""
+    try:
+        lavagem = Lavagem.objects.select_related('veiculo', 'colaborador_externa', 'colaborador_interna').get(
+            id=lavagem_id)
+
+        return JsonResponse({
+            'success': True,
+            'lavagem': {
+                'id': lavagem.id,
+                'veiculo': {
+                    'id': lavagem.veiculo.id,
+                    'placa': lavagem.veiculo.placa,
+                    'nome': lavagem.veiculo.nome
+                },
+                'horario_chegada': lavagem.horario_chegada.strftime(
+                    '%Y-%m-%dT%H:%M') if lavagem.horario_chegada else '',
+                'horario_pista': lavagem.horario_pista.strftime('%Y-%m-%dT%H:%M') if lavagem.horario_pista else '',
+                'horario_saida': lavagem.horario_saida.strftime('%Y-%m-%dT%H:%M') if lavagem.horario_saida else '',
+                'colaborador_externa_id': lavagem.colaborador_externa.id if lavagem.colaborador_externa else None,
+                'colaborador_interna_id': lavagem.colaborador_interna.id if lavagem.colaborador_interna else None
+            }
+        })
+    except Lavagem.DoesNotExist:
+        return JsonResponse({
+            'success': False,
+            'message': 'Lavagem não encontrada'
+        }, status=404)
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': 'Erro ao obter lavagem'
+        }, status=500)
+
+
+@require_http_methods(["POST"])
+def atualizar_lavagem(request, lavagem_id):
+    """Atualiza os dados de uma lavagem"""
+    try:
+        data = json.loads(request.body)
+        lavagem = get_object_or_404(Lavagem, id=lavagem_id)
+
+        # Atualiza horários
+        horario_chegada_str = data.get('horario_chegada')
+        if horario_chegada_str:
+            horario_naive = parse_datetime(horario_chegada_str)
+            if horario_naive:
+                lavagem.horario_chegada = timezone.make_aware(horario_naive)
+
+        horario_pista_str = data.get('horario_pista')
+        if horario_pista_str:
+            horario_naive = parse_datetime(horario_pista_str)
+            lavagem.horario_pista = timezone.make_aware(horario_naive) if horario_naive else None
+        else:
+            lavagem.horario_pista = None
+
+        horario_saida_str = data.get('horario_saida')
+        if horario_saida_str:
+            horario_naive = parse_datetime(horario_saida_str)
+            lavagem.horario_saida = timezone.make_aware(horario_naive) if horario_naive else None
+        else:
+            lavagem.horario_saida = None
+
+        # Atualiza colaboradores
+        colaborador_externa_id = data.get('colaborador_externa_id')
+        lavagem.colaborador_externa_id = colaborador_externa_id if colaborador_externa_id else None
+
+        colaborador_interna_id = data.get('colaborador_interna_id')
+        lavagem.colaborador_interna_id = colaborador_interna_id if colaborador_interna_id else None
+
+        lavagem.save()
+
+        return JsonResponse({
+            'success': True,
+            'message': 'Lavagem atualizada com sucesso'
+        })
+
+    except json.JSONDecodeError:
+        return JsonResponse({
+            'success': False,
+            'message': 'Dados inválidos'
+        }, status=400)
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': f'Erro ao atualizar lavagem: {str(e)}'
+        }, status=500)
+
+
+@require_http_methods(["POST"])
+def excluir_lavagem(request, lavagem_id):
+    """Exclui uma lavagem"""
+    try:
+        lavagem = get_object_or_404(Lavagem, id=lavagem_id)
+        lavagem.delete()
+
+        return JsonResponse({
+            'success': True,
+            'message': 'Lavagem excluída com sucesso'
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': f'Erro ao excluir lavagem: {str(e)}'
+        }, status=500)
+
+
+@require_http_methods(["GET"])
+def obter_lavagens_hoje(request):
+    """Obtém todas as lavagens de hoje com estatísticas"""
+    try:
+        hoje = timezone.now().date()
+        lavagens_hoje = Lavagem.objects.filter(horario_chegada__date=hoje)
+
+        total_hoje = lavagens_hoje.count()
+        em_fila = lavagens_hoje.filter(horario_pista__isnull=True).count()
+        na_pista = lavagens_hoje.filter(horario_pista__isnull=False, horario_saida__isnull=True).count()
+        concluidos = lavagens_hoje.filter(horario_saida__isnull=False).count()
+
+        return JsonResponse({
+            'success': True,
+            'stats': {
+                'total': total_hoje,
+                'fila': em_fila,
+                'pista': na_pista,
+                'concluidos': concluidos
+            }
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': 'Erro ao obter dados'
+        }, status=500)
