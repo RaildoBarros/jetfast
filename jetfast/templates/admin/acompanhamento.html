@@ -135,6 +135,30 @@
         gap: 10px;
         margin-top: 20px;
     }
+
+    /* Resultados da busca */
+    .resultado-item {
+        padding: 12px;
+        border-bottom: 1px solid #eee;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .resultado-item:hover {
+        background: #f9f9f9;
+    }
+    .resultado-item:last-child {
+        border-bottom: none;
+    }
+    .resultado-placa {
+        font-weight: bold;
+        color: var(--primary-dark);
+        font-size: 1.1em;
+    }
+    .resultado-info {
+        color: #666;
+        font-size: 0.9em;
+        margin-top: 3px;
+    }
     .btn-primary {
         flex: 1;
         padding: 12px;
@@ -277,26 +301,22 @@
 
         <div id="formNovaLavagem">
             <div class="form-group">
-                <label>Placa do Veículo *</label>
+                <label>Buscar Veículo *</label>
                 <input type="text"
-                       id="input_placa"
-                       placeholder="ABC-1234 ou ABC1D23"
+                       id="input_busca"
+                       placeholder="Placa, proprietário, telefone ou marca"
                        style="text-transform: uppercase;"
-                       maxlength="8">
-                <small>Digite a placa e pressione Enter ou clique em "Buscar"</small>
-                <div id="error_placa" class="error-message"></div>
-            </div>
+                       autocomplete="off">
+                <small>Digite para buscar (placa, nome, telefone ou marca)</small>
+                <div id="error_busca" class="error-message"></div>
 
-            <button type="button"
-                    onclick="buscarVeiculo()"
-                    class="btn-primary"
-                    style="width: 100%; margin-bottom: 20px;">
-                Buscar Veículo
-            </button>
+                <!-- Lista de resultados -->
+                <div id="resultados_busca" style="display: none; max-height: 300px; overflow-y: auto; border: 1px solid #ddd; border-radius: 5px; margin-top: 10px; background: white;"></div>
+            </div>
 
             <div id="loading_veiculo" class="loading">
                 <div class="spinner"></div>
-                <p>Buscando veículo...</p>
+                <p>Buscando veículos...</p>
             </div>
 
             <div id="dados_veiculo" style="display: none;">
@@ -324,11 +344,74 @@
                     </button>
                 </div>
             </div>
+
+            <!-- Mensagem quando não encontrar -->
+            <div id="nao_encontrado" style="display: none;">
+                <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #ffc107;">
+                    <p style="margin: 0 0 10px 0;"><strong>Veículo não encontrado</strong></p>
+                    <p style="margin: 0; color: #666;">Deseja cadastrar um novo veículo?</p>
+                </div>
+                <button type="button" onclick="abrirFormularioCadastro()" class="btn-primary" style="width: 100%;">
+                    + Cadastrar Novo Veículo
+                </button>
+            </div>
+        </div>
+
+        <!-- Formulário de Cadastro de Novo Veículo -->
+        <div id="formCadastroVeiculo" style="display: none;">
+            <h4 style="margin-bottom: 15px;">Cadastrar Novo Veículo</h4>
+
+            <div class="form-group">
+                <label>Placa *</label>
+                <input type="text" id="novo_placa" placeholder="ABC-1234" style="text-transform: uppercase;" maxlength="8" required>
+                <small>Formato: ABC-1234 ou ABC1D23</small>
+            </div>
+
+            <div class="form-group">
+                <label>Proprietário *</label>
+                <input type="text" id="novo_nome" placeholder="Nome do proprietário" required>
+            </div>
+
+            <div class="form-group">
+                <label>Telefone</label>
+                <input type="text" id="novo_telefone" placeholder="(95) 99999-9999" maxlength="15">
+                <small>Formato: (95) 99999-9999</small>
+            </div>
+
+            <div class="form-group">
+                <label>Marca *</label>
+                <select id="novo_marca" required onchange="carregarModelos()">
+                    <option value="">Selecione a marca...</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Modelo *</label>
+                <select id="novo_modelo" required>
+                    <option value="">Selecione primeiro a marca...</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Categoria</label>
+                <select id="novo_categoria">
+                    <option value="">Nenhuma</option>
+                </select>
+            </div>
+
+            <div class="btn-container">
+                <button type="button" onclick="salvarNovoVeiculo()" class="btn-primary">
+                    Salvar e Registrar Lavagem
+                </button>
+                <button type="button" onclick="voltarParaBusca()" class="btn-secondary">
+                    Voltar
+                </button>
+            </div>
         </div>
 
         <div id="loading_salvar" class="loading">
             <div class="spinner"></div>
-            <p>Salvando lavagem...</p>
+            <p>Salvando...</p>
         </div>
     </div>
 </div>
@@ -347,7 +430,7 @@
             <div id="sessaoColaboradores" style="display:none;">
                 <div class="form-group">
                     <label>Colaborador Externa:</label>
-                    <select style="height: 40px;" name="colaborador_externa" id="sel_ext">
+                    <select name="colaborador_externa" id="sel_ext">
                         <option value="">Selecione...</option>
                         {% for c in colaboradores_list %}
                         <option value="{{ c.id }}">{{ c.nome }}</option>
@@ -355,9 +438,9 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Colaborador Interna:</label>
-                    <select style="height: 40px;" name="colaborador_interna">
-                        <option value="">Selecione...</option>
+                    <label>Colaborador Interna (Opcional):</label>
+                    <select name="colaborador_interna">
+                        <option value="">Nenhum</option>
                         {% for c in colaboradores_list %}
                         <option value="{{ c.id }}">{{ c.nome }}</option>
                         {% endfor %}
@@ -381,12 +464,18 @@
 // ========================================
 // Modal: Nova Lavagem
 // ========================================
+let buscaTimeout = null;
+
 function abrirModalNovaLavagem() {
     document.getElementById('modalNovaLavagem').style.display = 'block';
-    document.getElementById('input_placa').value = '';
-    document.getElementById('error_placa').textContent = '';
+    document.getElementById('input_busca').value = '';
+    document.getElementById('error_busca').textContent = '';
     document.getElementById('dados_veiculo').style.display = 'none';
-    document.getElementById('input_placa').focus();
+    document.getElementById('resultados_busca').style.display = 'none';
+    document.getElementById('nao_encontrado').style.display = 'none';
+    document.getElementById('formNovaLavagem').style.display = 'block';
+    document.getElementById('formCadastroVeiculo').style.display = 'none';
+    document.getElementById('input_busca').focus();
 
     // Define horário atual
     const agora = new Date();
@@ -402,53 +491,82 @@ function fecharModalNovaLavagem() {
     document.getElementById('modalNovaLavagem').style.display = 'none';
 }
 
-// Buscar veículo pela placa
-async function buscarVeiculo() {
-    const placa = document.getElementById('input_placa').value.trim().toUpperCase();
-    const errorDiv = document.getElementById('error_placa');
+// Busca com debounce
+function buscarVeiculos() {
+    const termo = document.getElementById('input_busca').value.trim();
 
-    errorDiv.textContent = '';
+    clearTimeout(buscaTimeout);
 
-    if (!placa) {
-        errorDiv.textContent = 'Por favor, digite uma placa';
+    if (termo.length < 2) {
+        document.getElementById('resultados_busca').style.display = 'none';
+        document.getElementById('nao_encontrado').style.display = 'none';
         return;
     }
 
-    document.getElementById('loading_veiculo').style.display = 'block';
-    document.getElementById('dados_veiculo').style.display = 'none';
+    buscaTimeout = setTimeout(async () => {
+        document.getElementById('loading_veiculo').style.display = 'block';
+        document.getElementById('dados_veiculo').style.display = 'none';
+        document.getElementById('nao_encontrado').style.display = 'none';
 
-    try {
-        const response = await fetch(`/jetfast/api/buscar-veiculo/?placa=${encodeURIComponent(placa)}`);
-        const data = await response.json();
+        try {
+            const response = await fetch(`/jetfast/api/buscar-veiculos/?termo=${encodeURIComponent(termo)}`);
+            const data = await response.json();
 
-        document.getElementById('loading_veiculo').style.display = 'none';
+            document.getElementById('loading_veiculo').style.display = 'none';
 
-        if (data.success) {
-            // Preenche os dados do veículo
-            document.getElementById('veiculo_id').value = data.veiculo.id;
-            document.getElementById('veiculo_placa').textContent = data.veiculo.placa;
-            document.getElementById('veiculo_nome').textContent = data.veiculo.nome;
-            document.getElementById('veiculo_modelo').textContent = data.veiculo.modelo;
-            document.getElementById('veiculo_telefone').textContent = data.veiculo.telefone || 'Não informado';
-            document.getElementById('dados_veiculo').style.display = 'block';
-        } else {
-            errorDiv.textContent = data.message || 'Veículo não encontrado';
+            if (data.success && data.veiculos.length > 0) {
+                mostrarResultados(data.veiculos);
+            } else {
+                document.getElementById('resultados_busca').style.display = 'none';
+                document.getElementById('nao_encontrado').style.display = 'block';
+            }
+        } catch (error) {
+            document.getElementById('loading_veiculo').style.display = 'none';
+            document.getElementById('error_busca').textContent = 'Erro ao buscar. Tente novamente.';
+            console.error('Erro:', error);
         }
-    } catch (error) {
-        document.getElementById('loading_veiculo').style.display = 'none';
-        errorDiv.textContent = 'Erro ao buscar veículo. Tente novamente.';
-        console.error('Erro:', error);
-    }
+    }, 500);
 }
 
-// Enter para buscar
+function mostrarResultados(veiculos) {
+    const container = document.getElementById('resultados_busca');
+    container.innerHTML = '';
+
+    veiculos.forEach(veiculo => {
+        const item = document.createElement('div');
+        item.className = 'resultado-item';
+        item.onclick = () => selecionarVeiculo(veiculo);
+        item.innerHTML = `
+            <div class="resultado-placa">${veiculo.placa}</div>
+            <div class="resultado-info">
+                ${veiculo.nome} • ${veiculo.modelo}<br>
+                ${veiculo.telefone ? veiculo.telefone + ' • ' : ''}${veiculo.categoria}
+            </div>
+        `;
+        container.appendChild(item);
+    });
+
+    container.style.display = 'block';
+}
+
+function selecionarVeiculo(veiculo) {
+    document.getElementById('resultados_busca').style.display = 'none';
+    document.getElementById('veiculo_id').value = veiculo.id;
+    document.getElementById('veiculo_placa').textContent = veiculo.placa;
+    document.getElementById('veiculo_nome').textContent = veiculo.nome;
+    document.getElementById('veiculo_modelo').textContent = veiculo.modelo;
+    document.getElementById('veiculo_telefone').textContent = veiculo.telefone || 'Não informado';
+    document.getElementById('dados_veiculo').style.display = 'block';
+}
+
+// Event listener para busca em tempo real
 document.addEventListener('DOMContentLoaded', function() {
-    const inputPlaca = document.getElementById('input_placa');
-    if (inputPlaca) {
-        inputPlaca.addEventListener('keypress', function(e) {
+    const inputBusca = document.getElementById('input_busca');
+    if (inputBusca) {
+        inputBusca.addEventListener('input', buscarVeiculos);
+        inputBusca.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
-                buscarVeiculo();
             }
         });
     }
@@ -492,6 +610,163 @@ async function salvarNovaLavagem() {
     } catch (error) {
         alert('Erro ao salvar. Tente novamente.');
         document.getElementById('formNovaLavagem').style.display = 'block';
+        document.getElementById('loading_salvar').style.display = 'none';
+        console.error('Erro:', error);
+    }
+}
+
+// ========================================
+// Cadastro de Novo Veículo
+// ========================================
+async function abrirFormularioCadastro() {
+    document.getElementById('formNovaLavagem').style.display = 'none';
+    document.getElementById('formCadastroVeiculo').style.display = 'block';
+
+    // Preenche a placa se foi digitada
+    const termoBusca = document.getElementById('input_busca').value.trim().toUpperCase();
+    if (termoBusca.length <= 8 && /^[A-Z0-9-]+$/.test(termoBusca)) {
+        document.getElementById('novo_placa').value = termoBusca;
+    }
+
+    // Carrega marcas e categorias
+    await carregarMarcas();
+    await carregarCategorias();
+}
+
+function voltarParaBusca() {
+    document.getElementById('formCadastroVeiculo').style.display = 'none';
+    document.getElementById('formNovaLavagem').style.display = 'block';
+}
+
+async function carregarMarcas() {
+    try {
+        const response = await fetch('/jetfast/api/listar-marcas/');
+        const data = await response.json();
+
+        const select = document.getElementById('novo_marca');
+        select.innerHTML = '<option value="">Selecione a marca...</option>';
+
+        data.marcas.forEach(marca => {
+            const option = document.createElement('option');
+            option.value = marca.id;
+            option.textContent = marca.nome;
+            select.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Erro ao carregar marcas:', error);
+    }
+}
+
+async function carregarModelos() {
+    const marcaId = document.getElementById('novo_marca').value;
+    const selectModelo = document.getElementById('novo_modelo');
+
+    if (!marcaId) {
+        selectModelo.innerHTML = '<option value="">Selecione primeiro a marca...</option>';
+        return;
+    }
+
+    try {
+        const response = await fetch(`/jetfast/api/listar-modelos/?marca_id=${marcaId}`);
+        const data = await response.json();
+
+        selectModelo.innerHTML = '<option value="">Selecione o modelo...</option>';
+
+        data.modelos.forEach(modelo => {
+            const option = document.createElement('option');
+            option.value = modelo.id;
+            option.textContent = modelo.nome;
+            selectModelo.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Erro ao carregar modelos:', error);
+    }
+}
+
+async function carregarCategorias() {
+    try {
+        const response = await fetch('/jetfast/api/listar-categorias/');
+        const data = await response.json();
+
+        const select = document.getElementById('novo_categoria');
+        select.innerHTML = '<option value="">Nenhuma</option>';
+
+        data.categorias.forEach(categoria => {
+            const option = document.createElement('option');
+            option.value = categoria.id;
+            option.textContent = categoria.nome;
+            select.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Erro ao carregar categorias:', error);
+    }
+}
+
+async function salvarNovoVeiculo() {
+    const placa = document.getElementById('novo_placa').value.trim().toUpperCase();
+    const nome = document.getElementById('novo_nome').value.trim();
+    const telefone = document.getElementById('novo_telefone').value.trim();
+    const modeloId = document.getElementById('novo_modelo').value;
+    const categoriaId = document.getElementById('novo_categoria').value;
+
+    if (!placa || !nome || !modeloId) {
+        alert('Preencha todos os campos obrigatórios (marcados com *)');
+        return;
+    }
+
+    document.getElementById('formCadastroVeiculo').style.display = 'none';
+    document.getElementById('loading_salvar').style.display = 'block';
+
+    try {
+        const response = await fetch('/jetfast/api/criar-veiculo/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+                placa: placa,
+                nome: nome,
+                telefone: telefone,
+                modelo_veiculo_id: modeloId,
+                categoria_id: categoriaId
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            // Agora registra a lavagem automaticamente
+            const horarioChegada = document.getElementById('input_horario_chegada').value;
+
+            const responseLavagem = await fetch('/jetfast/api/criar-lavagem/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    veiculo_id: data.veiculo_id,
+                    horario_chegada: horarioChegada
+                })
+            });
+
+            const dataLavagem = await responseLavagem.json();
+
+            if (dataLavagem.success) {
+                location.reload();
+            } else {
+                alert('Veículo cadastrado, mas erro ao registrar lavagem: ' + dataLavagem.message);
+                location.reload();
+            }
+        } else {
+            alert(data.message || 'Erro ao cadastrar veículo');
+            document.getElementById('formCadastroVeiculo').style.display = 'block';
+            document.getElementById('loading_salvar').style.display = 'none';
+        }
+    } catch (error) {
+        alert('Erro ao salvar. Tente novamente.');
+        document.getElementById('formCadastroVeiculo').style.display = 'block';
         document.getElementById('loading_salvar').style.display = 'none';
         console.error('Erro:', error);
     }

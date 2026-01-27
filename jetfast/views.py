@@ -100,38 +100,165 @@ def acompanhamento_lavagens(request):
 # ========================================
 
 @require_http_methods(["GET"])
-def buscar_veiculo(request):
-    """Busca veículo pela placa"""
-    placa = request.GET.get('placa', '').strip().upper()
+def buscar_veiculos(request):
+    """Busca veículos por placa, proprietário, telefone ou marca"""
+    termo = request.GET.get('termo', '').strip().upper()
 
-    if not placa:
+    if not termo or len(termo) < 2:
         return JsonResponse({
             'success': False,
-            'message': 'Placa não fornecida'
+            'message': 'Digite pelo menos 2 caracteres'
         })
 
     try:
-        veiculo = Veiculo.objects.select_related('modelo_veiculo__marca', 'categoria').get(placa=placa)
-        return JsonResponse({
-            'success': True,
-            'veiculo': {
+        # Busca em múltiplos campos
+        veiculos = Veiculo.objects.select_related(
+            'modelo_veiculo__marca',
+            'categoria'
+        ).filter(
+            Q(placa__icontains=termo) |
+            Q(nome__icontains=termo) |
+            Q(telefone__icontains=termo) |
+            Q(modelo_veiculo__marca__nome__icontains=termo) |
+            Q(modelo_veiculo__nome__icontains=termo)
+        )[:10]  # Limita a 10 resultados
+
+        resultados = []
+        for veiculo in veiculos:
+            resultados.append({
                 'id': veiculo.id,
                 'placa': veiculo.placa,
                 'nome': veiculo.nome,
-                'telefone': veiculo.telefone,
+                'telefone': veiculo.telefone or '',
                 'modelo': f"{veiculo.modelo_veiculo.marca.nome} {veiculo.modelo_veiculo.nome}",
                 'categoria': veiculo.categoria.nome if veiculo.categoria else 'Sem categoria'
-            }
+            })
+
+        return JsonResponse({
+            'success': True,
+            'veiculos': resultados
         })
-    except Veiculo.DoesNotExist:
+
+    except Exception as e:
         return JsonResponse({
             'success': False,
-            'message': f'Veículo com placa {placa} não encontrado'
+            'message': 'Erro ao buscar veículos'
+        }, status=500)
+
+
+@require_http_methods(["GET"])
+def listar_marcas(request):
+    """Lista todas as marcas disponíveis"""
+    try:
+        from .models import Marca
+        marcas = Marca.objects.all().order_by('nome')
+
+        return JsonResponse({
+            'success': True,
+            'marcas': [{'id': m.id, 'nome': m.nome} for m in marcas]
         })
     except Exception as e:
         return JsonResponse({
             'success': False,
-            'message': 'Erro ao buscar veículo'
+            'message': 'Erro ao carregar marcas'
+        }, status=500)
+
+
+@require_http_methods(["GET"])
+def listar_modelos(request):
+    """Lista modelos de uma marca específica"""
+    marca_id = request.GET.get('marca_id')
+
+    if not marca_id:
+        return JsonResponse({
+            'success': False,
+            'message': 'Marca não especificada'
+        })
+
+    try:
+        from .models import ModeloVeiculo
+        modelos = ModeloVeiculo.objects.filter(marca_id=marca_id).order_by('nome')
+
+        return JsonResponse({
+            'success': True,
+            'modelos': [{'id': m.id, 'nome': m.nome} for m in modelos]
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': 'Erro ao carregar modelos'
+        }, status=500)
+
+
+@require_http_methods(["GET"])
+def listar_categorias(request):
+    """Lista todas as categorias disponíveis"""
+    try:
+        from .models import Categoria
+        categorias = Categoria.objects.all().order_by('nome')
+
+        return JsonResponse({
+            'success': True,
+            'categorias': [{'id': c.id, 'nome': c.nome} for c in categorias]
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': 'Erro ao carregar categorias'
+        }, status=500)
+
+
+@require_http_methods(["POST"])
+def criar_veiculo(request):
+    """Cria um novo veículo"""
+    try:
+        data = json.loads(request.body)
+
+        placa = data.get('placa', '').strip().upper()
+        nome = data.get('nome', '').strip()
+        telefone = data.get('telefone', '').strip()
+        modelo_veiculo_id = data.get('modelo_veiculo_id')
+        categoria_id = data.get('categoria_id')
+
+        if not placa or not nome or not modelo_veiculo_id:
+            return JsonResponse({
+                'success': False,
+                'message': 'Dados incompletos. Preencha placa, nome e modelo.'
+            })
+
+        # Verifica se a placa já existe
+        if Veiculo.objects.filter(placa=placa).exists():
+            return JsonResponse({
+                'success': False,
+                'message': f'Já existe um veículo cadastrado com a placa {placa}'
+            })
+
+        # Cria o veículo
+        from .models import ModeloVeiculo, Categoria
+
+        veiculo = Veiculo.objects.create(
+            placa=placa,
+            nome=nome,
+            telefone=telefone if telefone else None,
+            modelo_veiculo_id=modelo_veiculo_id,
+            categoria_id=categoria_id if categoria_id else None
+        )
+
+        return JsonResponse({
+            'success': True,
+            'message': 'Veículo cadastrado com sucesso',
+            'veiculo_id': veiculo.id
+        })
+
+    except json.JSONDecodeError:
+        return JsonResponse({
+            'success': False,
+            'message': 'Dados inválidos'
+        }, status=400)
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': f'Erro ao cadastrar veículo: {str(e)}'
         }, status=500)
 
 
