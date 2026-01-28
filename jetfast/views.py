@@ -2,11 +2,11 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
-from django.views.decorators.csrf import csrf_exempt
 from .models import Veiculo, Lavagem, Colaborador
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from django.db.models import Q
+from datetime import datetime, time
 import json
 
 
@@ -29,7 +29,7 @@ def registrar_lavagem(request, pk):
     veiculo = get_object_or_404(Veiculo, id=pk)
 
     if request.method == 'POST':
-        # Registro direto, sem validação de quantidade
+        # Registro direto, usando horário atual de Boa Vista
         Lavagem.objects.create(veiculo=veiculo, horario_chegada=timezone.now())
         messages.success(request, "Veículo adicionado à fila!")
 
@@ -42,8 +42,7 @@ def mover_para_pista(request, lavagem_id):
         horario = request.POST.get('horario_custom')
 
         if horario:
-            horario_naive = parse_datetime(horario)
-            lavagem.horario_pista = timezone.make_aware(horario_naive) if horario_naive else timezone.now()
+            lavagem.horario_pista = parse_datetime(horario)
         else:
             lavagem.horario_pista = timezone.now()
 
@@ -59,8 +58,7 @@ def finalizar_lavagem(request, lavagem_id):
         horario = request.POST.get('horario_custom')
 
         if horario:
-            horario_naive = parse_datetime(horario)
-            lavagem.horario_saida = timezone.make_aware(horario_naive) if horario_naive else timezone.now()
+            lavagem.horario_saida = parse_datetime(horario)
         else:
             lavagem.horario_saida = timezone.now()
 
@@ -69,8 +67,17 @@ def finalizar_lavagem(request, lavagem_id):
 
 
 def acompanhamento_lavagens(request):
+    # Pega a data de hoje no timezone local (Boa Vista)
     hoje = timezone.localtime(timezone.now()).date()
-    lavagens_hoje = Lavagem.objects.filter(horario_chegada__date=hoje)
+
+    # Cria range do dia (00:00 até 23:59) no timezone local
+    inicio_dia = timezone.make_aware(datetime.combine(hoje, time.min))
+    fim_dia = timezone.make_aware(datetime.combine(hoje, time.max))
+
+    lavagens_hoje = Lavagem.objects.filter(
+        horario_chegada__gte=inicio_dia,
+        horario_chegada__lte=fim_dia
+    )
 
     colaboradores = Colaborador.objects.filter(ativo=True).order_by('nome')
 
@@ -279,12 +286,8 @@ def criar_lavagem(request):
 
         veiculo = get_object_or_404(Veiculo, id=veiculo_id)
 
-        # Parse do horário
-        horario_naive = parse_datetime(horario_chegada_str)
-        if horario_naive:
-            horario_chegada = timezone.make_aware(horario_naive)
-        else:
-            horario_chegada = timezone.now()
+        # Parse do horário (Django trata automaticamente o timezone)
+        horario_chegada = parse_datetime(horario_chegada_str) or timezone.now()
 
         # Cria a lavagem
         lavagem = Lavagem.objects.create(
@@ -318,6 +321,14 @@ def obter_lavagem(request, lavagem_id):
         lavagem = Lavagem.objects.select_related('veiculo', 'colaborador_externa', 'colaborador_interna').get(
             id=lavagem_id)
 
+        def formatar_horario(dt):
+            """Converte para hora local de Boa Vista antes de formatar"""
+            if dt:
+                # Converte para timezone local (Boa Vista)
+                dt_local = timezone.localtime(dt)
+                return dt_local.strftime('%Y-%m-%dT%H:%M')
+            return ''
+
         return JsonResponse({
             'success': True,
             'lavagem': {
@@ -327,10 +338,9 @@ def obter_lavagem(request, lavagem_id):
                     'placa': lavagem.veiculo.placa,
                     'nome': lavagem.veiculo.nome
                 },
-                'horario_chegada': lavagem.horario_chegada.strftime(
-                    '%Y-%m-%dT%H:%M') if lavagem.horario_chegada else '',
-                'horario_pista': lavagem.horario_pista.strftime('%Y-%m-%dT%H:%M') if lavagem.horario_pista else '',
-                'horario_saida': lavagem.horario_saida.strftime('%Y-%m-%dT%H:%M') if lavagem.horario_saida else '',
+                'horario_chegada': formatar_horario(lavagem.horario_chegada),
+                'horario_pista': formatar_horario(lavagem.horario_pista),
+                'horario_saida': formatar_horario(lavagem.horario_saida),
                 'colaborador_externa_id': lavagem.colaborador_externa.id if lavagem.colaborador_externa else None,
                 'colaborador_interna_id': lavagem.colaborador_interna.id if lavagem.colaborador_interna else None,
                 'observacao': lavagem.observacao or ''
@@ -358,22 +368,18 @@ def atualizar_lavagem(request, lavagem_id):
         # Atualiza horários
         horario_chegada_str = data.get('horario_chegada')
         if horario_chegada_str:
-            horario_naive = parse_datetime(horario_chegada_str)
-            if horario_naive:
-                lavagem.horario_chegada = timezone.make_aware(horario_naive)
+            lavagem.horario_chegada = parse_datetime(horario_chegada_str) or timezone.now()
 
         horario_pista_str = data.get('horario_pista')
         if horario_pista_str:
-            horario_naive = parse_datetime(horario_pista_str)
-            lavagem.horario_pista = timezone.make_aware(horario_naive) if horario_naive else None
-        else:
+            lavagem.horario_pista = parse_datetime(horario_pista_str)
+        elif horario_pista_str == '':
             lavagem.horario_pista = None
 
         horario_saida_str = data.get('horario_saida')
         if horario_saida_str:
-            horario_naive = parse_datetime(horario_saida_str)
-            lavagem.horario_saida = timezone.make_aware(horario_naive) if horario_naive else None
-        else:
+            lavagem.horario_saida = parse_datetime(horario_saida_str)
+        elif horario_saida_str == '':
             lavagem.horario_saida = None
 
         # Atualiza colaboradores
@@ -428,8 +434,17 @@ def excluir_lavagem(request, lavagem_id):
 def obter_lavagens_hoje(request):
     """Obtém todas as lavagens de hoje com estatísticas"""
     try:
+        # Pega a data de hoje no timezone local (Boa Vista)
         hoje = timezone.localtime(timezone.now()).date()
-        lavagens_hoje = Lavagem.objects.filter(horario_chegada__date=hoje)
+
+        # Cria range do dia (00:00 até 23:59) no timezone local
+        inicio_dia = timezone.make_aware(datetime.combine(hoje, time.min))
+        fim_dia = timezone.make_aware(datetime.combine(hoje, time.max))
+
+        lavagens_hoje = Lavagem.objects.filter(
+            horario_chegada__gte=inicio_dia,
+            horario_chegada__lte=fim_dia
+        )
 
         total_hoje = lavagens_hoje.count()
         em_fila = lavagens_hoje.filter(horario_pista__isnull=True).count()

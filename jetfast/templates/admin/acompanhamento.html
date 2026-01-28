@@ -492,7 +492,7 @@ startAutoRefresh();
                 <div class="form-group">
                     <label>Colaborador Interna (Opcional):</label>
                     <select name="colaborador_interna">
-                        <option value="">Nenhum</option>
+                        <option value="">Selecione...</option>
                         {% for c in colaboradores_list %}
                         <option value="{{ c.id }}">{{ c.nome }}</option>
                         {% endfor %}
