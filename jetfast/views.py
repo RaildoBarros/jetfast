@@ -69,7 +69,7 @@ def finalizar_lavagem(request, lavagem_id):
 
 
 def acompanhamento_lavagens(request):
-    hoje = timezone.now().date()
+    hoje = timezone.localtime(timezone.now()).date()
     lavagens_hoje = Lavagem.objects.filter(horario_chegada__date=hoje)
 
     colaboradores = Colaborador.objects.filter(ativo=True).order_by('nome')
@@ -428,7 +428,7 @@ def excluir_lavagem(request, lavagem_id):
 def obter_lavagens_hoje(request):
     """Obtém todas as lavagens de hoje com estatísticas"""
     try:
-        hoje = timezone.now().date()
+        hoje = timezone.localtime(timezone.now()).date()
         lavagens_hoje = Lavagem.objects.filter(horario_chegada__date=hoje)
 
         total_hoje = lavagens_hoje.count()
