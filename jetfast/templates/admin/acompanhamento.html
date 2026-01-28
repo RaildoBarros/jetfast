@@ -742,8 +742,7 @@ document.addEventListener('DOMContentLoaded', function() {
 async function salvarNovaLavagem() {
     const veiculoId = document.getElementById('veiculo_id').value;
     const horarioChegada = document.getElementById('input_horario_chegada').value;
-    const observacao = document.getElementById('input_observacao') ?
-                               document.getElementById('input_observacao').value.trim() : '';
+    const observacao = document.getElementById('input_observacao').value.trim();
 
     if (!veiculoId || !horarioChegada) {
         alert('Preencha todos os campos obrigatórios');
@@ -915,8 +914,6 @@ async function salvarNovoVeiculo() {
         if (data.success) {
             // Agora registra a lavagem automaticamente
             const horarioChegada = document.getElementById('input_horario_chegada').value;
-            const observacao = document.getElementById('input_observacao') ?
-                               document.getElementById('input_observacao').value.trim() : '';
 
             const responseLavagem = await fetch('/jetfast/api/criar-lavagem/', {
                 method: 'POST',
@@ -927,7 +924,7 @@ async function salvarNovoVeiculo() {
                 body: JSON.stringify({
                     veiculo_id: data.veiculo_id,
                     horario_chegada: horarioChegada,
-                    observacao: observacao || null
+                    observacao: document.getElementById('input_observacao').value.trim() || null
                 })
             });
 

@@ -8,7 +8,6 @@ from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from django.db.models import Q
 import json
-import pytz
 
 
 def detalhes_veiculo(request, pk):
@@ -44,12 +43,7 @@ def mover_para_pista(request, lavagem_id):
 
         if horario:
             horario_naive = parse_datetime(horario)
-            if horario_naive:
-                # Interpreta como hora local de Boa Vista
-                boa_vista_tz = pytz.timezone('America/Boa_Vista')
-                lavagem.horario_pista = boa_vista_tz.localize(horario_naive)
-            else:
-                lavagem.horario_pista = timezone.now()
+            lavagem.horario_pista = timezone.make_aware(horario_naive) if horario_naive else timezone.now()
         else:
             lavagem.horario_pista = timezone.now()
 
@@ -66,12 +60,7 @@ def finalizar_lavagem(request, lavagem_id):
 
         if horario:
             horario_naive = parse_datetime(horario)
-            if horario_naive:
-                # Interpreta como hora local de Boa Vista
-                boa_vista_tz = pytz.timezone('America/Boa_Vista')
-                lavagem.horario_saida = boa_vista_tz.localize(horario_naive)
-            else:
-                lavagem.horario_saida = timezone.now()
+            lavagem.horario_saida = timezone.make_aware(horario_naive) if horario_naive else timezone.now()
         else:
             lavagem.horario_saida = timezone.now()
 
@@ -290,11 +279,10 @@ def criar_lavagem(request):
 
         veiculo = get_object_or_404(Veiculo, id=veiculo_id)
 
-        # Parse do horário como hora local de Boa Vista
+        # Parse do horário
         horario_naive = parse_datetime(horario_chegada_str)
         if horario_naive:
-            boa_vista_tz = pytz.timezone('America/Boa_Vista')
-            horario_chegada = boa_vista_tz.localize(horario_naive)
+            horario_chegada = timezone.make_aware(horario_naive)
         else:
             horario_chegada = timezone.now()
 
@@ -367,27 +355,24 @@ def atualizar_lavagem(request, lavagem_id):
         data = json.loads(request.body)
         lavagem = get_object_or_404(Lavagem, id=lavagem_id)
 
-        # Timezone de Boa Vista
-        boa_vista_tz = pytz.timezone('America/Boa_Vista')
-
         # Atualiza horários
         horario_chegada_str = data.get('horario_chegada')
         if horario_chegada_str:
             horario_naive = parse_datetime(horario_chegada_str)
             if horario_naive:
-                lavagem.horario_chegada = boa_vista_tz.localize(horario_naive)
+                lavagem.horario_chegada = timezone.make_aware(horario_naive)
 
         horario_pista_str = data.get('horario_pista')
         if horario_pista_str:
             horario_naive = parse_datetime(horario_pista_str)
-            lavagem.horario_pista = boa_vista_tz.localize(horario_naive) if horario_naive else None
+            lavagem.horario_pista = timezone.make_aware(horario_naive) if horario_naive else None
         else:
             lavagem.horario_pista = None
 
         horario_saida_str = data.get('horario_saida')
         if horario_saida_str:
             horario_naive = parse_datetime(horario_saida_str)
-            lavagem.horario_saida = boa_vista_tz.localize(horario_naive) if horario_naive else None
+            lavagem.horario_saida = timezone.make_aware(horario_naive) if horario_naive else None
         else:
             lavagem.horario_saida = None
 
