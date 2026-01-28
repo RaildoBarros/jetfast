@@ -269,6 +269,7 @@ def criar_lavagem(request):
         data = json.loads(request.body)
         veiculo_id = data.get('veiculo_id')
         horario_chegada_str = data.get('horario_chegada')
+        observacao = data.get('observacao')
 
         if not veiculo_id or not horario_chegada_str:
             return JsonResponse({
@@ -288,7 +289,8 @@ def criar_lavagem(request):
         # Cria a lavagem
         lavagem = Lavagem.objects.create(
             veiculo=veiculo,
-            horario_chegada=horario_chegada
+            horario_chegada=horario_chegada,
+            observacao=observacao
         )
 
         return JsonResponse({
@@ -330,7 +332,8 @@ def obter_lavagem(request, lavagem_id):
                 'horario_pista': lavagem.horario_pista.strftime('%Y-%m-%dT%H:%M') if lavagem.horario_pista else '',
                 'horario_saida': lavagem.horario_saida.strftime('%Y-%m-%dT%H:%M') if lavagem.horario_saida else '',
                 'colaborador_externa_id': lavagem.colaborador_externa.id if lavagem.colaborador_externa else None,
-                'colaborador_interna_id': lavagem.colaborador_interna.id if lavagem.colaborador_interna else None
+                'colaborador_interna_id': lavagem.colaborador_interna.id if lavagem.colaborador_interna else None,
+                'observacao': lavagem.observacao or ''
             }
         })
     except Lavagem.DoesNotExist:
@@ -379,6 +382,10 @@ def atualizar_lavagem(request, lavagem_id):
 
         colaborador_interna_id = data.get('colaborador_interna_id')
         lavagem.colaborador_interna_id = colaborador_interna_id if colaborador_interna_id else None
+
+        # Atualiza observação
+        observacao = data.get('observacao')
+        lavagem.observacao = observacao if observacao else None
 
         lavagem.save()
 

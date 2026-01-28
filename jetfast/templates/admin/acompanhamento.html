@@ -303,6 +303,13 @@ startAutoRefresh();
 
                 <p style="margin-bottom: 8px;"><span class="label">Cliente:</span> {{ l.veiculo.nome }}</p>
 
+                {% if l.observacao %}
+                <div style="background: #fff3cd; padding: 8px; border-radius: 4px; margin-bottom: 8px; border-left: 3px solid #ffc107;">
+                    <span class="label" style="color: #856404;">Observação:</span>
+                    <p style="margin: 3px 0 0 0; font-size: 0.85em; color: #856404; white-space: pre-wrap;">{{ l.observacao }}</p>
+                </div>
+                {% endif %}
+
                 {% if l.horario_pista %}
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #f9f9f9; padding: 5px; border-radius: 4px;">
                     <div>
@@ -550,6 +557,15 @@ startAutoRefresh();
                 </select>
             </div>
 
+            <div class="form-group">
+                <label>Observação:</label>
+                <textarea id="edit_observacao"
+                          rows="3"
+                          placeholder="Detalhes especiais, serviços extras, etc."
+                          style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; resize: vertical;"></textarea>
+                <small>Informações adicionais sobre esta lavagem</small>
+            </div>
+
             <input type="hidden" id="edit_lavagem_id">
 
             <div class="btn-container">
@@ -726,6 +742,7 @@ document.addEventListener('DOMContentLoaded', function() {
 async function salvarNovaLavagem() {
     const veiculoId = document.getElementById('veiculo_id').value;
     const horarioChegada = document.getElementById('input_horario_chegada').value;
+    const observacao = document.getElementById('input_observacao').value.trim();
 
     if (!veiculoId || !horarioChegada) {
         alert('Preencha todos os campos obrigatórios');
@@ -744,7 +761,8 @@ async function salvarNovaLavagem() {
             },
             body: JSON.stringify({
                 veiculo_id: veiculoId,
-                horario_chegada: horarioChegada
+                horario_chegada: horarioChegada,
+                observacao: observacao || null
             })
         });
 
@@ -905,7 +923,8 @@ async function salvarNovoVeiculo() {
                 },
                 body: JSON.stringify({
                     veiculo_id: data.veiculo_id,
-                    horario_chegada: horarioChegada
+                    horario_chegada: horarioChegada,
+                    observacao: document.getElementById('input_observacao').value.trim() || null
                 })
             });
 
@@ -960,6 +979,7 @@ async function abrirModalEditarLavagem(lavagemId) {
 
             document.getElementById('edit_colaborador_externa').value = lavagem.colaborador_externa_id || '';
             document.getElementById('edit_colaborador_interna').value = lavagem.colaborador_interna_id || '';
+            document.getElementById('edit_observacao').value = lavagem.observacao || '';
 
             document.getElementById('loading_editar').style.display = 'none';
             document.getElementById('formEditarLavagem').style.display = 'block';
@@ -986,6 +1006,7 @@ async function salvarEdicaoLavagem() {
     const horarioSaida = document.getElementById('edit_horario_saida').value;
     const colaboradorExternaId = document.getElementById('edit_colaborador_externa').value;
     const colaboradorInternaId = document.getElementById('edit_colaborador_interna').value;
+    const observacao = document.getElementById('edit_observacao').value.trim();
 
     if (!horarioChegada) {
         alert('O horário de chegada é obrigatório');
@@ -1007,7 +1028,8 @@ async function salvarEdicaoLavagem() {
                 horario_pista: horarioPista || null,
                 horario_saida: horarioSaida || null,
                 colaborador_externa_id: colaboradorExternaId || null,
-                colaborador_interna_id: colaboradorInternaId || null
+                colaborador_interna_id: colaboradorInternaId || null,
+                observacao: observacao || null
             })
         });
 

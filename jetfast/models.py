@@ -93,6 +93,7 @@ class Lavagem(models.Model):
     horario_chegada = models.DateTimeField(default=timezone.now, verbose_name="Chegada (Fila)")
     horario_pista = models.DateTimeField(null=True, blank=True, verbose_name="Início (Pista)")
     horario_saida = models.DateTimeField(null=True, blank=True, verbose_name="Fim (Saída)")
+    observacao = models.TextField(null=True, blank=True, verbose_name="Observação")
 
     def __str__(self):
         status = "Em fila"
@@ -105,4 +106,3 @@ class Lavagem(models.Model):
     class Meta:
         ordering = ['-horario_chegada']
         verbose_name_plural = "Lavagens"
-
