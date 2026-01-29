@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
+from django.contrib.auth.decorators import login_required
 from .models import Veiculo, Lavagem, Colaborador
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
@@ -10,6 +11,7 @@ from datetime import datetime, time
 import json
 
 
+@login_required
 def detalhes_veiculo(request, pk):
     veiculo = get_object_or_404(Veiculo, pk=pk)
     colaboradores = Colaborador.objects.all()
@@ -25,6 +27,7 @@ def detalhes_veiculo(request, pk):
     })
 
 
+@login_required
 def registrar_lavagem(request, pk):
     veiculo = get_object_or_404(Veiculo, id=pk)
 
@@ -36,6 +39,7 @@ def registrar_lavagem(request, pk):
     return redirect('detalhes_veiculo', pk=pk)
 
 
+@login_required
 def mover_para_pista(request, lavagem_id):
     if request.method == 'POST':
         lavagem = get_object_or_404(Lavagem, id=lavagem_id)
@@ -52,6 +56,7 @@ def mover_para_pista(request, lavagem_id):
         return redirect('acompanhamento_lavagens')
 
 
+@login_required
 def finalizar_lavagem(request, lavagem_id):
     if request.method == 'POST':
         lavagem = get_object_or_404(Lavagem, id=lavagem_id)
@@ -65,7 +70,8 @@ def finalizar_lavagem(request, lavagem_id):
         lavagem.save()
         return redirect('acompanhamento_lavagens')
 
-
+        
+@login_required
 def acompanhamento_lavagens(request):
     # Pega a data de hoje no timezone local (Boa Vista)
     hoje = timezone.localtime(timezone.now()).date()
