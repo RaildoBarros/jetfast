@@ -164,3 +164,6 @@ CSRF_TRUSTED_ORIGINS = ['https://raildo.pythonanywhere.com', 'https://jetfast.py
 # Garante que cookies de login funcionem em frames
 SESSION_COOKIE_SAMESITE = 'Lax'
 CSRF_COOKIE_SAMESITE = 'Lax'
+
+LOGIN_URL = '/admin/login/'
+LOGIN_REDIRECT_URL = '/admin/'
