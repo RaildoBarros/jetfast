@@ -34,7 +34,8 @@ MARCAS_MODELOS = {
     'Nissan': ['Kicks', 'Frontier', 'Versa']
 }
 
-CATEGORIAS_PADRAO = ['Pequeno', 'Médio', 'Grande', 'SUV', 'Picape']
+# CATEGORIAS ATUALIZADAS
+CATEGORIAS_PADRAO = ['PRIME', 'EXECUTIVE', 'PREMIUM', 'OFF-ROAD', 'ELITE']
 
 OBSERVACOES = [
     'Cliente solicitou limpeza detalhada',
@@ -106,13 +107,13 @@ def criar_dados_teste(n=100):
     print("\n🚗 Verificando marcas e modelos...")
     marcas_dict = {}
     modelos = []
-    
+
     for marca_nome, lista_modelos in MARCAS_MODELOS.items():
         marca, created = Marca.objects.get_or_create(nome=marca_nome)
         marcas_dict[marca_nome] = marca
         if created:
             print(f"   ✅ Marca '{marca_nome}' criada")
-        
+
         for modelo_nome in lista_modelos:
             modelo, created = ModeloVeiculo.objects.get_or_create(
                 nome=modelo_nome,
@@ -121,22 +122,22 @@ def criar_dados_teste(n=100):
             modelos.append(modelo)
             if created:
                 print(f"      ✅ Modelo '{modelo_nome}' criado")
-    
+
     print(f"   ✅ Total: {len(marcas_dict)} marcas, {len(modelos)} modelos")
 
     # 4. Criar veículos fictícios
     print(f"\n🚙 Criando veículos...")
     veiculos = list(Veiculo.objects.all())
     veiculos_criados = 0
-    
+
     # Garantir pelo menos 30 veículos
     while len(veiculos) < 30:
         placa = gerar_placa()
-        
+
         # Verificar se a placa já existe
         if Veiculo.objects.filter(placa=placa).exists():
             continue
-        
+
         try:
             veiculo = Veiculo.objects.create(
                 placa=placa,
@@ -147,40 +148,40 @@ def criar_dados_teste(n=100):
             )
             veiculos.append(veiculo)
             veiculos_criados += 1
-            
+
             if veiculos_criados % 5 == 0:
                 print(f"   ✅ {veiculos_criados} veículos criados...")
-                
+
         except Exception as e:
             print(f"   ⚠️  Erro ao criar veículo: {e}")
             continue
-    
+
     print(f"   ✅ Total de veículos: {len(veiculos)}")
 
     # 5. Gerar lavagens com fluxos realistas
     print(f"\n💦 Gerando {n} lavagens...")
     lavagens_criadas = 0
-    
+
     for i in range(n):
         try:
             # Data aleatória nos últimos 30 dias
             dias_atras = random.randint(0, 30)
             agora = timezone.now()
             data_base = agora - timedelta(days=dias_atras)
-            
+
             # Horário de chegada aleatório entre 08:00 e 18:00
             hora_chegada = random.randint(8, 17)
             minuto_chegada = random.randint(0, 59)
-            
+
             chegada = data_base.replace(
                 hour=hora_chegada,
                 minute=minuto_chegada,
                 second=0,
                 microsecond=0
             )
-            
+
             veiculo = random.choice(veiculos)
-            
+
             # Criar lavagem
             lavagem = Lavagem.objects.create(
                 veiculo=veiculo,
@@ -189,31 +190,31 @@ def criar_dados_teste(n=100):
                 colaborador_interna=random.choice(colaboradores) if random.random() > 0.3 else None,
                 observacao=random.choice(OBSERVACOES) if random.random() > 0.5 else None
             )
-            
+
             # 80% das lavagens já entraram na pista
             if random.random() > 0.2:
                 tempo_espera = random.randint(10, 60)
                 lavagem.horario_pista = chegada + timedelta(minutes=tempo_espera)
-                
+
                 # Atribuir colaboradores se ainda não tiver
                 if not lavagem.colaborador_externa:
                     lavagem.colaborador_externa = random.choice(colaboradores)
-                
+
                 # Dessas, 90% já foram finalizadas
                 if random.random() > 0.1:
                     tempo_lavagem = random.randint(30, 90)
                     lavagem.horario_saida = lavagem.horario_pista + timedelta(minutes=tempo_lavagem)
-            
+
             lavagem.save()
             lavagens_criadas += 1
-            
+
             if (i + 1) % 10 == 0:
                 print(f"   ✅ {i + 1}/{n} lavagens criadas...")
-                
+
         except Exception as e:
             print(f"   ⚠️  Erro ao criar lavagem {i + 1}: {e}")
             continue
-    
+
     print(f"\n{'=' * 60}")
     print(f"✨ CONCLUÍDO!")
     print(f"{'=' * 60}")
@@ -229,7 +230,7 @@ def criar_dados_teste(n=100):
 
 if __name__ == '__main__':
     import sys
-    
+
     # Verificar se passou quantidade como argumento
     quantidade = 100
     if len(sys.argv) > 1:
@@ -237,11 +238,11 @@ if __name__ == '__main__':
             quantidade = int(sys.argv[1])
         except ValueError:
             print("⚠️  Quantidade inválida, usando padrão: 100")
-    
+
     print(f"\n{'=' * 60}")
     print(f"  SEED DATA - SISTEMA JETFAST")
     print(f"{'=' * 60}\n")
-    
+
     # Confirmar antes de executar
     resposta = input(f"Criar {quantidade} lavagens de teste? (s/n): ")
     if resposta.lower() in ['s', 'sim', 'y', 'yes']:

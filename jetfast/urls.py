@@ -1,5 +1,5 @@
 from django.urls import path
-from . import views
+from . import views, dashboard_views
 
 urlpatterns = [
     path('', views.detalhes_veiculo, name='detalhes_veiculo_root'),  # Fallback
@@ -10,6 +10,7 @@ urlpatterns = [
     path('lavagem/<int:lavagem_id>/pista/', views.mover_para_pista, name='mover_para_pista'),
     path('lavagem/<int:lavagem_id>/finalizar/', views.finalizar_lavagem, name='finalizar_lavagem'),
     path('acompanhamento/', views.acompanhamento_lavagens, name='acompanhamento_lavagens'),
+    path('dashboard/', dashboard_views.dashboard, name='dashboard'),
 
     # API Endpoints para o popup
     path('api/buscar-veiculos/', views.buscar_veiculos, name='api_buscar_veiculos'),
