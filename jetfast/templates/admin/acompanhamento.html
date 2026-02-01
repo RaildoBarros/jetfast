@@ -418,7 +418,7 @@ startAutoRefresh();
         <div id="formCadastroVeiculo" style="display: none;">
             <h4 style="margin-bottom: 15px;">Cadastrar Novo Veículo</h4>
 
-            <div class="form-group">
+           <div class="form-group">
                 <label>Placa *</label>
                 <input type="text" id="novo_placa" placeholder="ABC-1234" style="text-transform: uppercase;" maxlength="8" required>
                 <small>Formato: ABC-1234 ou ABC1D23</small>
@@ -453,6 +453,15 @@ startAutoRefresh();
                 <label>Categoria</label>
                 <select id="novo_categoria">
                     <option value="">Nenhuma</option>
+                </select>
+            </div>
+
+            <!-- NOVO: Campo Tipo de Cliente -->
+            <div class="form-group">
+                <label>Tipo de Cliente *</label>
+                <select id="novo_tipo_cliente" required>
+                    <option value="ORGANICO">Orgânico</option>
+                    <option value="JETFAST">JetFast</option>
                 </select>
             </div>
 
@@ -889,8 +898,9 @@ async function salvarNovoVeiculo() {
     const telefone = document.getElementById('novo_telefone').value.trim();
     const modeloId = document.getElementById('novo_modelo').value;
     const categoriaId = document.getElementById('novo_categoria').value;
+    const tipoCliente = document.getElementById('novo_tipo_cliente').value;  // NOVO
 
-    if (!placa || !nome || !modeloId) {
+    if (!placa || !nome || !modeloId || !tipoCliente) {  // MODIFICADO: adicionar tipoCliente na validação
         alert('Preencha todos os campos obrigatórios (marcados com *)');
         return;
     }
@@ -910,7 +920,8 @@ async function salvarNovoVeiculo() {
                 nome: nome,
                 telefone: telefone,
                 modelo_veiculo_id: modeloId,
-                categoria_id: categoriaId
+                categoria_id: categoriaId,
+                tipo_cliente: tipoCliente  // NOVO
             })
         });
 

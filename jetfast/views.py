@@ -232,6 +232,7 @@ def criar_veiculo(request):
         telefone = data.get('telefone', '').strip()
         modelo_veiculo_id = data.get('modelo_veiculo_id')
         categoria_id = data.get('categoria_id')
+        tipo_cliente = data.get('tipo_cliente', 'ORGANICO')  # NOVO: padrão ORGANICO
 
         if not placa or not nome or not modelo_veiculo_id:
             return JsonResponse({
@@ -254,7 +255,8 @@ def criar_veiculo(request):
             nome=nome,
             telefone=telefone if telefone else None,
             modelo_veiculo_id=modelo_veiculo_id,
-            categoria_id=categoria_id if categoria_id else None
+            categoria_id=categoria_id if categoria_id else None,
+            tipo_cliente=tipo_cliente  # NOVO: adicionar tipo_cliente
         )
 
         return JsonResponse({

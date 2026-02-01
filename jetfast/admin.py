@@ -48,10 +48,10 @@ class ModeloVeiculoAdmin(admin.ModelAdmin):
 
 @admin.register(Veiculo)
 class VeiculoAdmin(admin.ModelAdmin):
-    list_display = ('placa', 'nome', 'telefone', 'modelo_veiculo', 'categoria', 'ver_detalhes')
+    list_display = ('placa', 'nome', 'telefone', 'modelo_veiculo', 'categoria', 'tipo_cliente', 'ver_detalhes')
     search_fields = ('placa', 'nome', 'telefone', 'modelo_veiculo__nome', 'categoria__nome')
-    list_filter = ('categoria', 'modelo_veiculo')
-    autocomplete_fields = ['modelo_veiculo', 'categoria']  # Busca dinâmica nos formulários
+    list_filter = ('categoria', 'tipo_cliente', 'modelo_veiculo')
+    autocomplete_fields = ['modelo_veiculo', 'categoria']
 
     def ver_detalhes(self, obj):
         url = reverse('detalhes_veiculo', args=[obj.id])

@@ -54,6 +54,11 @@ class Veiculo(models.Model):
         message="O telefone deve estar no formato (11) 99999-9999 ou 11999999999"
     )
 
+    TIPO_CLIENTE_CHOICES = [
+        ('JETFAST', 'JetFast'),
+        ('ORGANICO', 'Orgânico'),
+    ]
+
     placa = models.CharField(max_length=8, unique=True, validators=[placa_validator])
     nome = models.CharField(max_length=200)
     telefone = models.CharField(max_length=15, validators=[telefone_validator], help_text="Ex: 11 99999-9999",
@@ -65,6 +70,12 @@ class Veiculo(models.Model):
         verbose_name="Categoria",
         null=True,
         blank=True
+    )
+    tipo_cliente = models.CharField(
+        max_length=10,
+        choices=TIPO_CLIENTE_CHOICES,
+        default='ORGANICO',
+        verbose_name="Tipo de Cliente"
     )
     data_cadastro = models.DateTimeField(auto_now_add=True)
 

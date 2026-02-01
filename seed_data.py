@@ -125,7 +125,7 @@ def criar_dados_teste(n=100):
 
     print(f"   ✅ Total: {len(marcas_dict)} marcas, {len(modelos)} modelos")
 
-    # 4. Criar veículos fictícios
+    # 4. Criar veículos fictícios com tipo_cliente
     print(f"\n🚙 Criando veículos...")
     veiculos = list(Veiculo.objects.all())
     veiculos_criados = 0
@@ -139,12 +139,16 @@ def criar_dados_teste(n=100):
             continue
 
         try:
+            # 60% de chance de ser JETFAST, 40% ORGANICO
+            tipo_cliente = 'JETFAST' if random.random() < 0.6 else 'ORGANICO'
+
             veiculo = Veiculo.objects.create(
                 placa=placa,
                 nome=random.choice(NOMES),
                 telefone=gerar_telefone(),
                 modelo_veiculo=random.choice(modelos),
-                categoria=random.choice(categorias)
+                categoria=random.choice(categorias),
+                tipo_cliente=tipo_cliente
             )
             veiculos.append(veiculo)
             veiculos_criados += 1

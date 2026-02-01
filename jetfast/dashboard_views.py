@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Avg, Count, F, ExpressionWrapper, DurationField, Q
 from django.utils import timezone
 from datetime import datetime, time, timedelta
-from jetfast.models import Lavagem, Categoria, Colaborador
+from jetfast.models import Lavagem, Categoria, Colaborador, Veiculo
 
 
 @login_required
@@ -159,6 +159,21 @@ def dashboard(request):
     }
 
     # ========================================
+    # GRÁFICO: DISTRIBUIÇÃO POR TIPO DE CLIENTE
+    # ========================================
+    lavagens_por_tipo = lavagens.values(
+        'veiculo__tipo_cliente'
+    ).annotate(
+        total=Count('id')
+    ).order_by('-total')
+
+    distribuicao_tipo_cliente = {
+        'labels': [dict(Veiculo.TIPO_CLIENTE_CHOICES).get(item['veiculo__tipo_cliente'], 'Não Definido')
+                   for item in lavagens_por_tipo],
+        'data': [item['total'] for item in lavagens_por_tipo]
+    }
+
+    # ========================================
     # GRÁFICO: PRODUTIVIDADE POR COLABORADOR
     # ========================================
     produtividade_colaboradores = lavagens.values(
@@ -236,12 +251,13 @@ def dashboard(request):
 
     context = {
         'indicadores': indicadores,
-        'lavagens_por_dia_labels': lavagens_por_dia_labels,  # CORREÇÃO
-        'lavagens_por_dia_data': lavagens_por_dia_data,  # CORREÇÃO
+        'lavagens_por_dia_labels': lavagens_por_dia_labels,
+        'lavagens_por_dia_data': lavagens_por_dia_data,
         'distribuicao_categoria': distribuicao_categoria,
+        'distribuicao_tipo_cliente': distribuicao_tipo_cliente,
         'produtividade': produtividade,
         'analise_categorias': analise_categorias,
-        'dias_filtro': dias_param,  # Passa o parâmetro original
+        'dias_filtro': dias_param,
         'periodo_label': periodo_label,
         'lavagens_hoje': lavagens_hoje,
         'lavagens_concluidas_hoje': lavagens_concluidas_hoje,

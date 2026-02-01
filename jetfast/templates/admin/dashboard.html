@@ -152,6 +152,12 @@
         gap: 20px;
     }
 
+    .chart-row-three {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+    }
+
     .chart-card h3 {
         margin: 0 0 20px 0;
         color: #333;
@@ -278,7 +284,7 @@
 
     /* Responsive */
     @media (max-width: 768px) {
-        .chart-row {
+        .chart-row, .chart-row-three {
             grid-template-columns: 1fr;
         }
 
@@ -393,12 +399,19 @@
             </div>
         </div>
 
-        <!-- Distribuição por Categoria e Produtividade - Mesma linha -->
-        <div class="chart-row">
+        <!-- Distribuição por Categoria, Tipo de Cliente e Produtividade - Mesma linha -->
+        <div class="chart-row-three">
             <div class="chart-card">
                 <h3>🏷️ Distribuição por Categoria</h3>
                 <div class="chart-container">
                     <canvas id="chartCategoria"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <h3>👤 Tipo de Cliente</h3>
+                <div class="chart-container">
+                    <canvas id="chartTipoCliente"></canvas>
                 </div>
             </div>
 
@@ -575,6 +588,54 @@ new Chart(ctxCategoria, {
 });
 
 // ========================================
+// Gráfico: Tipo de Cliente
+// ========================================
+const ctxTipoCliente = document.getElementById('chartTipoCliente').getContext('2d');
+new Chart(ctxTipoCliente, {
+    type: 'bar',
+    data: {
+        labels: {{ distribuicao_tipo_cliente.labels|safe }},
+        datasets: [{
+            label: 'Lavagens',
+            data: {{ distribuicao_tipo_cliente.data|safe }},
+            backgroundColor: ['#007bff', '#28a745'],
+            borderColor: ['#0056b3', '#1e7e34'],
+            borderWidth: 2,
+            borderRadius: 5
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: false
+            },
+            tooltip: {
+                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                padding: 12
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1
+                },
+                grid: {
+                    color: 'rgba(0, 0, 0, 0.05)'
+                }
+            },
+            x: {
+                grid: {
+                    display: false
+                }
+            }
+        }
+    }
+});
+
+// ========================================
 // Gráfico: Produtividade por Colaborador
 // ========================================
 const ctxColaborador = document.getElementById('chartColaborador').getContext('2d');
@@ -631,10 +692,8 @@ function alterarTipoFiltro() {
     const customFilter = document.getElementById('customDateFilter');
 
     if (valor === 'custom') {
-        // Mostra campos de data customizados
         customFilter.classList.add('active');
 
-        // Define datas padrão (últimos 30 dias)
         const hoje = new Date();
         const trintaDiasAtras = new Date();
         trintaDiasAtras.setDate(hoje.getDate() - 30);
@@ -642,7 +701,6 @@ function alterarTipoFiltro() {
         document.getElementById('data-final').value = hoje.toISOString().split('T')[0];
         document.getElementById('data-inicial').value = trintaDiasAtras.toISOString().split('T')[0];
     } else {
-        // Esconde campos customizados e aplica filtro predefinido
         customFilter.classList.remove('active');
         aplicarFiltro();
     }
@@ -664,7 +722,6 @@ function aplicarFiltroCustom() {
         return;
     }
 
-    // Valida se data inicial não é maior que data final
     if (new Date(dataInicial) > new Date(dataFinal)) {
         alert('A data inicial não pode ser maior que a data final');
         return;
