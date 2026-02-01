@@ -15,6 +15,8 @@
         --accent-color: #fdb02e;
         --accent-dark: #e59a1f;
         --admin-black: #000; /* Cor padrão do header do Django ou use #000 */
+        --jetfast-blue: #007bff;
+        --organico-green: #28a745;
     }
 
     /* Mantém o Header padrão/preto */
@@ -73,6 +75,52 @@
         font-size: 0.9em;
         color: #666;
     }
+
+    /* Badge para Tipo de Cliente */
+    .badge-tipo-cliente {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-weight: bold;
+        font-size: 0.9em;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .badge-jetfast {
+        background: var(--jetfast-blue);
+        color: white;
+    }
+
+    .badge-organico {
+        background: var(--organico-green);
+        color: white;
+    }
+
+    /* Highlight para tipo de cliente */
+    .tipo-cliente-highlight {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        border-left: 4px solid var(--accent-color);
+        margin-bottom: 20px;
+    }
+
+    .tipo-cliente-highlight h3 {
+        margin: 0 0 10px 0;
+        color: #333;
+        font-size: 1.1em;
+    }
+
+    .tipo-cliente-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .tipo-cliente-icon {
+        font-size: 2em;
+    }
 </style>
 {% endblock %}
 
@@ -81,6 +129,22 @@
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
         <h1>Ficha do Veículo: <span style="color: var(--accent-dark);">{{ veiculo.placa }}</span></h1>
         <a href="{% url 'admin:jetfast_veiculo_changelist' %}" class="button">Voltar</a>
+    </div>
+
+    <!-- Destaque do Tipo de Cliente -->
+    <div class="tipo-cliente-highlight">
+        <h3>Tipo de Cliente</h3>
+        <div class="tipo-cliente-info">
+            {% if veiculo.tipo_cliente == 'JETFAST' %}
+                <span class="tipo-cliente-icon">⭐</span>
+                <span class="badge-tipo-cliente badge-jetfast">JetFast</span>
+                <span style="color: #666; font-size: 0.9em;">Cliente recorrente</span>
+            {% else %}
+                <span class="tipo-cliente-icon">🌱</span>
+                <span class="badge-tipo-cliente badge-organico">Orgânico</span>
+                <span style="color: #666; font-size: 0.9em;">Cliente eventual</span>
+            {% endif %}
+        </div>
     </div>
 
     <div class="module">
@@ -96,11 +160,19 @@
                 <th>Marca/Modelo:</th>
                 <td>{{ veiculo.modelo_veiculo.marca }} - {{ veiculo.modelo_veiculo.nome }}</td>
                 <th>Categoria:</th>
-                <td>{{ veiculo.categoria.nome }}</td>
+                <td>{{ veiculo.categoria.nome|default:"Sem categoria" }}</td>
             </tr>
             <tr>
+                <th>Tipo de Cliente:</th>
+                <td>
+                    {% if veiculo.tipo_cliente == 'JETFAST' %}
+                        <span class="badge-tipo-cliente badge-jetfast">⭐ JetFast</span>
+                    {% else %}
+                        <span class="badge-tipo-cliente badge-organico">🌱 Orgânico</span>
+                    {% endif %}
+                </td>
                 <th>Data de Cadastro:</th>
-                <td colspan="3">{{ veiculo.data_cadastro|date:"d/m/Y \à\s H:i" }}</td>
+                <td>{{ veiculo.data_cadastro|date:"d/m/Y \à\s H:i" }}</td>
             </tr>
         </table>
     </div>
@@ -146,5 +218,20 @@
             </tbody>
         </table>
     </div>
+
+    <!-- Estatísticas do veículo (opcional) -->
+    {% if lavagens_realizadas %}
+    <div class="module" style="margin-top: 30px;">
+        <h2>Estatísticas do Veículo</h2>
+        <table class="info-table" style="width: 100%; border-collapse: collapse;">
+            <tr>
+                <th>Total de Lavagens:</th>
+                <td><strong>{{ lavagens_realizadas|length }}</strong></td>
+                <th>Última Lavagem:</th>
+                <td>{{ lavagens_realizadas.0.horario_chegada|date:"d/m/Y \à\s H:i" }}</td>
+            </tr>
+        </table>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}
