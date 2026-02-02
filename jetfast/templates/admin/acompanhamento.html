@@ -211,6 +211,7 @@
 
 {% block extrahead %}
 {{ block.super }}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <script>
 // Pausa o auto-refresh quando modais estão abertos
 //let autoRefreshEnabled = true;
@@ -249,22 +250,24 @@ startAutoRefresh();
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
         <h1>Painel Operacional JetFast</h1>
         <div style="display: flex; gap: 10px;">
-            <button onclick="abrirModalNovaLavagem()"
-                    class="button"
-                    style="background: #28a745 !important; padding: 10px 20px; cursor: pointer;">
-                + NOVA LAVAGEM
-            </button>
-            <button onclick="abrirFormularioCadastroRapido()"
-                    class="button"
-                    style="background: #007bff !important; padding: 10px 20px; cursor: pointer;">
-                + CADASTRAR VEÍCULO
-            </button>
-            <button onclick="window.location.href='{% url 'dashboard' %}'"
-                class="button"
-                style="background: #17a2b8 !important; padding: 10px 20px; cursor: pointer;">
-            📊 DASHBOARD
-            </button>
-        </div>
+    <button onclick="abrirModalNovaLavagem()"
+            class="button"
+            title="Nova Lavagem"
+            style="background: #28a745 !important; padding: 10px; cursor: pointer; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; border-radius: 5px; border: none; color: white;">
+        <i class="fas fa-plus-circle"></i> </button>
+
+    <button onclick="abrirFormularioCadastroRapido()"
+            class="button"
+            title="Cadastrar Veículo"
+            style="background: #007bff !important; padding: 10px; cursor: pointer; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; border-radius: 5px; border: none; color: white;">
+        <i class="fas fa-car"></i> </button>
+
+    <button onclick="window.location.href='{% url 'dashboard' %}'"
+            class="button"
+            title="Dashboard"
+            style="background: #17a2b8 !important; padding: 10px; cursor: pointer; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; border-radius: 5px; border: none; color: white;">
+        <i class="fas fa-chart-bar"></i> </button>
+</div>
     </div>
 
     <div class="stats-container">
