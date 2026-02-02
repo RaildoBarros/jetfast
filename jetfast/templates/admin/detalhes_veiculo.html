@@ -131,22 +131,6 @@
         <a href="{% url 'admin:jetfast_veiculo_changelist' %}" class="button">Voltar</a>
     </div>
 
-    <!-- Destaque do Tipo de Cliente -->
-    <div class="tipo-cliente-highlight">
-        <h3>Tipo de Cliente</h3>
-        <div class="tipo-cliente-info">
-            {% if veiculo.tipo_cliente == 'JETFAST' %}
-                <span class="tipo-cliente-icon">⭐</span>
-                <span class="badge-tipo-cliente badge-jetfast">JetFast</span>
-                <span style="color: #666; font-size: 0.9em;">Cliente recorrente</span>
-            {% else %}
-                <span class="tipo-cliente-icon">🌱</span>
-                <span class="badge-tipo-cliente badge-organico">Orgânico</span>
-                <span style="color: #666; font-size: 0.9em;">Cliente eventual</span>
-            {% endif %}
-        </div>
-    </div>
-
     <div class="module">
         <h2>Dados do Proprietário e Veículo</h2>
         <table class="info-table" style="width: 100%; border-collapse: collapse;">
